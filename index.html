@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ilham Munawar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&family=Syne:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="templatemo-nexaverse.css">
+    <!-- 
+
+TemplateMo 603 Nexaverse
+
+https://templatemo.com/tm-603-nexaverse
+
+-->
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader-ring"></div>
+        <div class="loading-text">Initializing Experience...</div>
+    </div>
+
+    <!-- Ambient Background -->
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Grid Overlay -->
+    <div class="grid-overlay"></div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <div class="header" id="mainHeader">
+            <div class="logo">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00f0ff" />
+                            <stop offset="100%" style="stop-color:#7700ff" />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="50,5 95,30 95,70 50,95 5,70 5,30" fill="none" stroke="url(#logoGradient)"
+                        stroke-width="2" />
+                    <polygon points="50,20 80,37 80,63 50,80 20,63 20,37" fill="none" stroke="url(#logoGradient)"
+                        stroke-width="1.5" opacity="0.6" />
+                    <circle cx="50" cy="50" r="12" fill="url(#logoGradient)" opacity="0.3" />
+                    <circle cx="50" cy="50" r="6" fill="url(#logoGradient)" />
+                </svg>
+            </div>
+            <h1 class="brand-name">Ilham Munawar</h1>
+            <p class="tagline">Informatics Engineering</p>
+        </div>
+
+        <!-- Menu Grid -->
+        <div class="menu-grid" id="menuGrid">
+            <div class="menu-item initial-load" data-section="introduction">
+                <div class="menu-badge">PR</div>
+                <div class="menu-title">Perkenalan</div>
+            </div>
+            <div class="menu-item initial-load" data-section="services">
+                <div class="menu-badge">PY</div>
+                <div class="menu-title">Proyek</div>
+            </div>
+            <div class="menu-item initial-load" data-section="gallery">
+                <div class="menu-badge">SF</div>
+                <div class="menu-title">Sertifikat</div>
+            </div>
+            <div class="menu-item initial-load" data-section="contact">
+                <div class="menu-badge">KT</div>
+                <div class="menu-title">Kontak</div>
+            </div>
+        </div>
+
+        <!-- Content Sections -->
+        <div id="contentArea">
+            <!-- Introduction Section -->
+            <div class="content-section" id="introduction">
+                <div class="section-header-small">
+                    <div class="small-logo">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="smallLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#00f0ff" />
+                                    <stop offset="100%" style="stop-color:#ff00d4" />
+                                </linearGradient>
+                            </defs>
+                            <polygon points="50,10 85,32 85,68 50,90 15,68 15,32" fill="none"
+                                stroke="url(#smallLogoGrad)" stroke-width="3" />
+                            <circle cx="50" cy="50" r="10" fill="url(#smallLogoGrad)" />
+                        </svg>
+                    </div>
+                    <div class="small-brand">
+                        <h3>Ilham Munawar</h3>
+                        <p>Informatics Engineering</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+
+                <!-- Hero Banner -->
+                <div class="intro-hero">
+                    <div class="intro-hero-content">
+                        <span class="intro-badge" id="currentYear">2025</span>
+                        <h1 class="intro-headline">Perkenalan<br><span>Diri</span> </h1>
+                        <p class="intro-subtext">Saya seorang Web Developer dengan pengalaman dalam pengembangan Website
+                        </p>
+                        <div class="intro-cta-group">
+                            <button class="intro-cta-primary"
+                                onclick="toggleEducation('pengalaman')">Pengalaman</button>
+                            <button class="intro-cta-secondary"
+                                onclick="toggleEducation('pendidikan')">Pendidikan</button>
+                        </div>
+                    </div>
+                    <div class="intro-hero-visual">
+                        <div class="intro-floating-card card-1">
+                            <span class="card-icon">🔒</span>
+                            <span class="card-text">Konsisten</span>
+                        </div>
+                        <div class="intro-floating-card card-2">
+                            <span class="card-icon">🎯</span>
+                            <span class="card-text">Fokus</span>
+                        </div>
+                        <div class="intro-orb"></div>
+                    </div>
+                </div>
+
+                <!-- Pengalaman -->
+                <div class="intro-values" id="pengalaman" style="display:none;">
+                    <div class="value-card">
+                        <div class="value-number">01</div>
+                        <h3>Full Stack Developer</h3>
+                        <p>Magang (Agustus 2024 - Desember 2024)</p>
+                        <p>Badan Riset dan Inovasi Nasional</p>
+                    </div>
+                </div>
+
+                <!-- Pendidikan -->
+                <div class="intro-values" id="pendidikan" style="display:none;">
+                    <div class="value-card">
+                        <div class="value-number">01</div>
+                        <h3>D3 Teknik Informatika</h3>
+                        <p>IPK: 3.51</p>
+                        <p>Politeknik Negeri Cilacap (2022 - 2025)</p>
+                    </div>
+                </div>
+
+                <!-- Tech Stack Preview -->
+                <!-- <div class="intro-tech">
+                    <p class="tech-label">Technologies We Master</p>
+                    <div class="tech-marquee">
+                        <div class="tech-track">
+                            <span class="tech-item">React</span>
+                            <span class="tech-item">Next.js</span>
+                            <span class="tech-item">Node.js</span>
+                            <span class="tech-item">Python</span>
+                            <span class="tech-item">TensorFlow</span>
+                            <span class="tech-item">AWS</span>
+                            <span class="tech-item">Flutter</span>
+                            <span class="tech-item">Figma</span>
+                            <span class="tech-item">React</span>
+                            <span class="tech-item">Next.js</span>
+                            <span class="tech-item">Node.js</span>
+                            <span class="tech-item">Python</span>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+
+            <!-- Services Section -->
+            <div class="content-section" id="services">
+                <div class="section-header-small">
+                    <div class="small-logo">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="smallLogoGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#00f0ff" />
+                                    <stop offset="100%" style="stop-color:#ff00d4" />
+                                </linearGradient>
+                            </defs>
+                            <polygon points="50,10 85,32 85,68 50,90 15,68 15,32" fill="none"
+                                stroke="url(#smallLogoGrad2)" stroke-width="3" />
+                            <circle cx="50" cy="50" r="10" fill="url(#smallLogoGrad2)" />
+                        </svg>
+                    </div>
+                    <div class="small-brand">
+                        <h3>Ilham Munawar</h3>
+                        <p>Informatics Engineering</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+
+                <div class="section-header">
+                    <h2 class="section-title">Proyek</h2>
+                    <p class="section-subtitle">Proyek Saya</p>
+                </div>
+
+                <div class="tabs-container">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" onclick="switchTab(this, 'development')">Development</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'design')">Design</button>
+                    </div>
+
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="development">
+                            <div class="services-list">
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <img src="images/simapus.png" alt="AI Development">
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4>SIMAPUS</h4>
+                                        <p>Sistem Informasi Manajemen Puskesmas Berbasis Desktop</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                    <a class="service-row-link" href="https://github.com/10ilham/simapus"
+                                        aria-label="Buka detail SIMAPUS"></a>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <img src="images/sistemrawatinap.png" alt="Web Applications">
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4>Sistem Rawat Inap</h4>
+                                        <p>Sistem Rawat Inap Berbasis Website</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                    <a class="service-row-link" href="https://github.com/10ilham/sistem_rawat_inap"
+                                        aria-label="Buka detail Sistem Rawat Inap"></a>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <img src="images/kuesioner.png" alt="Mobile Apps">
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4>Kuesioner</h4>
+                                        <p>Sistem Informasi Kuesioner Berbasis Website Codeigniter</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                    <a class="service-row-link" href="https://github.com/10ilham/Kuesioner"
+                                        aria-label="Buka detail Kuesioner"></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="design">
+                            <div class="services-list">
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <img src="images/skincare.png" alt="UX/UI Design">
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4>I&U Touch</h4>
+                                        <p>Desain Aplikasi Skincare</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                    <a class="service-row-link"
+                                        href="https://www.figma.com/design/plfwJXeV9epdp2q3baQ3Qv/I-U-Touch-Real?node-id=0-1&t=zidJ8pkRa5tXmYXh-1"
+                                        aria-label="Buka detail I&U Touch"></a>
+                                </div>
+                                <!-- <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <img src="images/brand-identity.jpg" alt="Brand Identity">
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4>Brand Identity</h4>
+                                        <p>Complete brand packages including logos, typography, color systems, and comprehensive brand guidelines.</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <img src="images/motion-design.jpg" alt="Motion Design">
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4>Motion Design</h4>
+                                        <p>Engaging animations and interactive experiences that bring your digital products to life.</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                </div> -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gallery Section -->
+            <div class="content-section" id="gallery">
+                <div class="section-header-small">
+                    <div class="small-logo">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="smallLogoGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#00f0ff" />
+                                    <stop offset="100%" style="stop-color:#ff00d4" />
+                                </linearGradient>
+                            </defs>
+                            <polygon points="50,10 85,32 85,68 50,90 15,68 15,32" fill="none"
+                                stroke="url(#smallLogoGrad3)" stroke-width="3" />
+                            <circle cx="50" cy="50" r="10" fill="url(#smallLogoGrad3)" />
+                        </svg>
+                    </div>
+                    <div class="small-brand">
+                        <h3>Ilham Munawar</h3>
+                        <p>Informatics Engineering</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+
+                <div class="section-header">
+                    <h2 class="section-title">Portfolio</h2>
+                    <p class="section-subtitle">Jelajahi Sertifikat saya</p>
+                </div>
+
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterGallery('all', this)">All</button>
+                    <button class="filter-btn" onclick="filterGallery('website', this)">Website</button>
+                    <button class="filter-btn" onclick="filterGallery('ai', this)">Kecerdasan Buatan</button>
+                    <button class="filter-btn" onclick="filterGallery('jaringan', this)">Jaringan</button>
+                    <button class="filter-btn" onclick="filterGallery('database', this)">Database</button>
+                </div>
+
+                <div class="gallery-grid">
+                    <!-- Gambar Pertama -->
+                    <div class="gallery-item" data-category="website"
+                        data-images='["images/sertifikat/pelatihan_jwd.png", "images/sertifikat/pelatihan_jwd2.png"]'
+                        onclick="openCertificateModal(this)">
+                        <img src="images/sertifikat/pelatihan_jwd.png" alt="Sertifikat Web Development - Lembar 1">
+                        <div class="gallery-overlay">
+                            <h4>Pelatihan Junior Web Developer</h4>
+                            <p>Website</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-category="ai"
+                        data-images='["images/sertifikat/ai_beginner1.jpg", "images/sertifikat/ai_beginner2.jpg"]'
+                        onclick="openCertificateModal(this)">
+                        <img src="images/sertifikat/ai_beginner1.jpg" alt="Sertifikat AI - Lembar 1">
+                        <div class="gallery-overlay">
+                            <h4>Komdigi AI Beginner</h4>
+                            <p>Kecerdasan Buatan</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-category="jaringan"
+                        data-images='["images/sertifikat/introduction_to_networks.jpg"]'
+                        onclick="openCertificateModal(this)">
+                        <img src="images/sertifikat/introduction_to_networks.jpg" alt="Sertifikat Jaringan - Lembar 1">
+                        <div class="gallery-overlay">
+                            <h4>Cisco Introduction to Networks</h4>
+                            <p>Jaringan</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-category="database"
+                        data-images='["images/sertifikat/database_programming_with_sql_course.jpg"]'
+                        onclick="openCertificateModal(this)">
+                        <img src="images/sertifikat/database_programming_with_sql_course.jpg"
+                            alt="Sertifikat Database - Lembar 1">
+                        <div class="gallery-overlay">
+                            <h4>Oracle Database Programming with SQL Course</h4>
+                            <p>Database</p>
+                        </div>
+                    </div>
+
+                    <!-- Gambar Kedua dst -->
+                    <div class="gallery-item" data-category="website"
+                        data-images='["images/sertifikat/bnsp1.jpg", "images/sertifikat/bnsp2.jpg"]'
+                        onclick="openCertificateModal(this)">
+                        <img src="images/sertifikat/bnsp1.jpg" alt="Sertifikat Web - Lembar 1">
+                        <div class="gallery-overlay">
+                            <h4>BNSP Junior Web Developer</h4>
+                            <p>Website</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-category="website"
+                        data-images='["images/sertifikat/linkedin_css_for_developers.jpg"]'
+                        onclick="openCertificateModal(this)">
+                        <img src="images/sertifikat/linkedin_css_for_developers.jpg" alt="Sertifikat Web - Lembar 1">
+                        <div class="gallery-overlay">
+                            <h4>LinkedIn Css for Developers</h4>
+                            <p>Website</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-category="website"
+                        data-images='["images/sertifikat/linkedin_javascript_maps_sets.jpg"]'
+                        onclick="openCertificateModal(this)">
+                        <img src="images/sertifikat/linkedin_javascript_maps_sets.jpg" alt="Sertifikat Web - Lembar 1">
+                        <div class="gallery-overlay">
+                            <h4>LinkedIn Javascript Maps Sets</h4>
+                            <p>Website</p>
+                        </div>
+                    </div>
+
+                    <div class="gallery-item" data-category="ai"
+                        data-images='["images/sertifikat/ai_intermediate_ ai_track1.jpg", "images/sertifikat/ai_intermediate_ ai_track2.jpg"]'
+                        onclick="openCertificateModal(this)">
+                        <img src="images/sertifikat/ai_intermediate_ ai_track1.jpg"
+                            alt="Sertifikat AI Mobile - Lembar 1">
+                        <div class="gallery-overlay">
+                            <h4>Komdigi AI Intermediate</h4>
+                            <p>Kecerdasan Buatan</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-category="jaringan" data-images='["images/sertifikat/mtcna.jpg"]'
+                        onclick="openCertificateModal(this)">
+                        <img src="images/sertifikat/mtcna.jpg" alt="Sertifikat Jaringan - Lembar 1">
+                        <div class="gallery-overlay">
+                            <h4>MikroTik Certified Network Associate</h4>
+                            <p>Jaringan</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-category="database"
+                        data-images='["images/sertifikat/database_design_course.jpg"]'
+                        onclick="openCertificateModal(this)">
+                        <img src="images/sertifikat/database_design_course.jpg" alt="Sertifikat Database - Lembar 1">
+                        <div class="gallery-overlay">
+                            <h4>Oracle Database Design Course</h4>
+                            <p>Database</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Section -->
+            <div class="content-section" id="contact">
+                <div class="section-header-small">
+                    <div class="small-logo">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="smallLogoGrad6" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#00f0ff" />
+                                    <stop offset="100%" style="stop-color:#ff00d4" />
+                                </linearGradient>
+                            </defs>
+                            <polygon points="50,10 85,32 85,68 50,90 15,68 15,32" fill="none"
+                                stroke="url(#smallLogoGrad6)" stroke-width="3" />
+                            <circle cx="50" cy="50" r="10" fill="url(#smallLogoGrad6)" />
+                        </svg>
+                    </div>
+                    <div class="small-brand">
+                        <h3>Ilham Munawar</h3>
+                        <p>Informatics Engineering>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+
+                <div class="section-header">
+                    <h2 class="section-title">Hubungi Saya</h2>
+                    <p class="section-subtitle">Mari kita ciptakan sesuatu yang luar biasa bersama</p>
+                </div>
+
+                <div class="contact-grid">
+                    <div class="contact-form">
+                        <div class="form-group">
+                            <input type="text" placeholder="Your Name">
+                        </div>
+                        <div class="form-group">
+                            <input type="email" placeholder="Your Email">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" placeholder="Subject">
+                        </div>
+                        <div class="form-group">
+                            <textarea placeholder="Your Message"></textarea>
+                        </div>
+                        <button class="submit-btn">Send Message</button>
+                    </div>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <div class="contact-icon">📍</div>
+                            <div class="contact-details">
+                                <h4>Location</h4>
+                                <p>Indonesia</p>
+                            </div>
+                        </div>
+                        <!-- <div class="contact-item">
+                            <div class="contact-icon">📧</div>
+                            <div class="contact-details">
+                                <h4>Email</h4>
+                                <p>hello@nexaverse.com</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">📞</div>
+                            <div class="contact-details">
+                                <h4>Phone</h4>
+                                <p>+1 (555) 123-4567</p>
+                            </div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer" id="mainFooter">
+            <p>© 2025</p>
+        </footer>
+    </div>
+
+    <!-- Certificate Modal -->
+    <div class="certificate-modal" id="certificateModal">
+        <div class="modal-backdrop" onclick="closeCertificateModal()"></div>
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeCertificateModal()" aria-label="Close modal">×</button>
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Certificate Details</h3>
+                <p class="modal-subtitle" id="modalSubtitle">Certificate Information</p>
+            </div>
+            <div class="modal-body">
+                <div class="modal-image-container">
+                    <button class="modal-nav-btn modal-prev" onclick="prevModalImage()"
+                        aria-label="Previous image">‹</button>
+                    <img id="modalImage" src="" alt="Certificate">
+                    <button class="modal-nav-btn modal-next" onclick="nextModalImage()"
+                        aria-label="Next image">›</button>
+                </div>
+                <div class="modal-pagination" id="modalPagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="templatemo-nexa-scripts.js"></script>
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        let isPengalamanActive = true;
+
+        function toggleEducation(section) {
+            const pengalaman = document.getElementById('pengalaman');
+            const pendidikan = document.getElementById('pendidikan');
+            // Gunakan selector yang lebih spesifik untuk menghindari masalah perubahan class
+            const pengalamanBtn = document.querySelector('.intro-cta-group button:nth-child(1)');
+            const pendidikanBtn = document.querySelector('.intro-cta-group button:nth-child(2)');
+
+            isPengalamanActive = (section === 'pengalaman');
+
+            if (isPengalamanActive) {
+                pengalaman.style.display = 'block';
+                pendidikan.style.display = 'none';
+
+                // Pengalaman = Primary (Active)
+                pengalamanBtn.className = 'intro-cta-primary active';
+                // Pendidikan = Secondary (Inactive)
+                pendidikanBtn.className = 'intro-cta-secondary';
+            } else {
+                pengalaman.style.display = 'none';
+                pendidikan.style.display = 'block';
+
+                // Pengalaman = Secondary (Inactive)
+                pengalamanBtn.className = 'intro-cta-secondary';
+                // Pendidikan = Primary (Active)
+                pendidikanBtn.className = 'intro-cta-primary active';
+            }
+        }
+
+        // Initialize Pengalaman sebagai active saat page load
+        document.addEventListener('DOMContentLoaded', function () {
+            toggleEducation('pengalaman');
+        });
+    </script>
+</body>
+
+</html>
