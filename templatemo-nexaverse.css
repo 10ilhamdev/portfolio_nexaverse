@@ -254,8 +254,8 @@ body {
 /* Menu Grid */
 .menu-grid {
 	display: grid;
-	grid-template-columns: repeat(3, 204px);
-	gap: 25px;
+	grid-template-columns: repeat(2, 250px);
+	gap: 30px;
 	margin: 0 auto 40px;
 	justify-content: center;
 }
@@ -1846,7 +1846,7 @@ body {
 /* Responsive Design */
 @media (max-width: 992px) {
 	.menu-grid {
-		grid-template-columns: repeat(3, 170px);
+		grid-template-columns: repeat(2, 200px);
 	}
 
 	.menu-item {
