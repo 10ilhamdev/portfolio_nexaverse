@@ -45,6 +45,7 @@ body {
 	pointer-events: none;
 	z-index: 0;
 	overflow: hidden;
+	animation: rgbBackground 25s linear infinite;
 }
 
 .orb {
@@ -117,7 +118,7 @@ body {
 	pointer-events: none;
 	z-index: 1;
 	opacity: 0.6;
-	animation: gridScroll 60s linear infinite;
+	animation: gridScroll 60s linear infinite, rgbBackground 25s linear infinite;
 	transition: transform 0.2s ease-out;
 }
 
@@ -140,6 +141,29 @@ body {
 	pointer-events: none;
 	z-index: 2;
 	opacity: 0.85;
+	animation: rgbBackground 25s linear infinite;
+}
+
+/* Dragon Canvas — full viewport, flies all around the page */
+#dragon-canvas {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 4;
+	opacity: 1;
+	transition: filter 0.6s ease;
+}
+
+body.light-mode #dragon-canvas {
+	filter: drop-shadow(0 0 30px rgba(44, 201, 160, 0.45));
+}
+
+body:not(.light-mode) #dragon-canvas {
+	filter: drop-shadow(0 0 30px rgba(220, 50, 0, 0.65))
+	        drop-shadow(0 0 55px rgba(180, 20, 0, 0.35));
 }
 
 /* Loading Screen */
@@ -243,6 +267,27 @@ body {
 	}
 }
 
+@keyframes textGradientMove {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+@keyframes rgbBackground {
+	0% {
+		filter: hue-rotate(0deg);
+	}
+	100% {
+		filter: hue-rotate(360deg);
+	}
+}
+
 .logo {
 	width: 200px;
 	height: 200px;
@@ -265,11 +310,13 @@ body {
 	font-weight: 600;
 	letter-spacing: 6px;
 	margin-bottom: 12px;
-	background: linear-gradient(135deg, var(--primary) 0%, #ffffff 50%, var(--secondary) 100%);
+	background: linear-gradient(90deg, #00f0ff 0%, #007acc 25%, #9d4edd 50%, #ff00d4 75%, #00f0ff 100%);
+	background-size: 200% auto;
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
 	text-transform: uppercase;
+	animation: textGradientMove 6s ease infinite;
 }
 
 .tagline {
@@ -571,10 +618,12 @@ body {
 	font-size: 42px;
 	font-weight: 600;
 	margin-bottom: 15px;
-	background: linear-gradient(135deg, var(--primary) 0%, #ffffff 50%, var(--secondary) 100%);
+	background: linear-gradient(90deg, #00f0ff 0%, #007acc 25%, #9d4edd 50%, #ff00d4 75%, #00f0ff 100%);
+	background-size: 200% auto;
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
+	animation: textGradientMove 6s ease infinite;
 }
 
 .section-subtitle {
@@ -650,10 +699,12 @@ body {
 }
 
 .intro-headline span {
-	background: linear-gradient(135deg, var(--primary), var(--accent));
+	background: linear-gradient(90deg, #00f0ff 0%, #007acc 25%, #9d4edd 50%, #ff00d4 75%, #00f0ff 100%);
+	background-size: 200% auto;
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
+	animation: textGradientMove 6s ease infinite;
 }
 
 .intro-subtext {
@@ -2152,18 +2203,22 @@ body.light-mode {
 
 body.light-mode .orb-1 {
 	background: radial-gradient(circle, rgba(0, 122, 204, 0.15) 0%, transparent 70%);
+	animation: float 20s ease-in-out infinite, lightOrb1 25s linear infinite;
 }
 
 body.light-mode .orb-2 {
 	background: radial-gradient(circle, rgba(0, 95, 158, 0.12) 0%, transparent 70%);
+	animation: float 20s ease-in-out infinite, lightOrb2 25s linear infinite;
 }
 
 body.light-mode .orb-3 {
 	background: radial-gradient(circle, rgba(0, 122, 204, 0.10) 0%, transparent 70%);
+	animation: float 20s ease-in-out infinite, lightOrb3 25s linear infinite;
 }
 
 body.light-mode .intro-orb {
 	background: radial-gradient(circle at 30% 30%, rgba(30, 58, 138, 0.15), rgba(0, 119, 182, 0.1) 50%, transparent 70%);
+	animation: orbPulse 4s ease-in-out infinite, lightIntroOrb 25s linear infinite;
 }
 
 body.light-mode .menu-badge {
@@ -2176,7 +2231,8 @@ body.light-mode .menu-badge {
 }
 
 body.light-mode .brand-name {
-	background: linear-gradient(135deg, var(--primary) 0%, #212529 50%, var(--secondary) 100%);
+	background: linear-gradient(90deg, #003f8a 0%, #0055b3 20%, #007acc 40%, #0096e6 60%, #00b4d8 80%, #003f8a 100%);
+	background-size: 200% auto;
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
@@ -2231,7 +2287,8 @@ body.light-mode .small-brand p {
 }
 
 body.light-mode .section-title {
-	background: linear-gradient(135deg, var(--primary) 0%, #0f172a 50%, var(--secondary) 100%);
+	background: linear-gradient(90deg, #003f8a 0%, #0055b3 20%, #007acc 40%, #0096e6 60%, #00b4d8 80%, #003f8a 100%);
+	background-size: 200% auto;
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
@@ -2370,4 +2427,58 @@ body.light-mode .intro-badge {
 		padding: 10px 20px;
 		font-size: 12px;
 	}
+}
+
+/* Light Mode Spiderman Color Cycling */
+body.light-mode .ambient-bg {
+	animation: lightRgbBackground 25s linear infinite;
+}
+
+body.light-mode .grid-overlay {
+	animation: gridScroll 60s linear infinite, lightRgbBackground 25s linear infinite;
+}
+
+body.light-mode #particles-canvas {
+	animation: lightRgbBackground 25s linear infinite;
+}
+
+@keyframes lightRgbBackground {
+	0%, 100% {
+		filter: hue-rotate(0deg);         /* Royal Blue base */
+	}
+	20% {
+		filter: hue-rotate(-30deg);        /* Cobalt / Electric Blue */
+	}
+	40% {
+		filter: hue-rotate(-55deg);        /* Cyan / Steel Blue */
+	}
+	60% {
+		filter: hue-rotate(20deg);         /* Sapphire Blue */
+	}
+	80% {
+		filter: hue-rotate(-20deg);        /* Navy / Deep Blue */
+	}
+}
+
+@keyframes lightOrb1 {
+	0%, 100% { background: radial-gradient(circle, rgba(0, 122, 204, 0.15) 0%, transparent 70%); }
+	33% { background: radial-gradient(circle, rgba(0, 60, 150, 0.15) 0%, transparent 70%); }
+	66% { background: radial-gradient(circle, rgba(0, 180, 216, 0.15) 0%, transparent 70%); }
+}
+
+@keyframes lightOrb2 {
+	0%, 100% { background: radial-gradient(circle, rgba(0, 95, 158, 0.12) 0%, transparent 70%); }
+	33% { background: radial-gradient(circle, rgba(0, 50, 130, 0.12) 0%, transparent 70%); }
+	66% { background: radial-gradient(circle, rgba(2, 132, 199, 0.12) 0%, transparent 70%); }
+}
+
+@keyframes lightOrb3 {
+	0%, 100% { background: radial-gradient(circle, rgba(0, 122, 204, 0.10) 0%, transparent 70%); }
+	33% { background: radial-gradient(circle, rgba(30, 58, 138, 0.12) 0%, transparent 70%); }
+	66% { background: radial-gradient(circle, rgba(0, 173, 230, 0.10) 0%, transparent 70%); }
+}
+
+@keyframes lightIntroOrb {
+	0%, 100% { background: radial-gradient(circle at 30% 30%, rgba(30, 58, 138, 0.15), rgba(0, 119, 182, 0.1) 50%, transparent 70%); }
+	50% { background: radial-gradient(circle at 30% 30%, rgba(0, 90, 180, 0.15), rgba(0, 180, 216, 0.10) 50%, transparent 70%); }
 }
