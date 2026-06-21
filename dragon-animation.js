@@ -10,8 +10,8 @@
     'use strict';
 
     /* ═══════════════ CONFIG ═══════════════ */
-    const NUM_SEGS    = 48; // Shorter, balanced body length
-    const LUT_SPEED   = 1.3; // Constant speed along the LUT path
+    const NUM_SEGS = 48; // Shorter, balanced body length
+    const LUT_SPEED = 1.3; // Constant speed along the LUT path
 
     const WP = [
         [0.10, 0.10], [0.45, 0.05], [0.88, 0.08],
@@ -22,8 +22,8 @@
         [0.50, 0.60], [0.28, 0.55],
     ];
 
-    const SEQ = ['fly','fly','charge','breathe','fly','fly','charge','breathe','fly','roar'];
-    const DUR  = { fly:8, charge:1.4, breathe:3.5, roar:2.2 };
+    const SEQ = ['fly', 'fly', 'charge', 'breathe', 'fly', 'fly', 'charge', 'breathe', 'fly', 'roar'];
+    const DUR = { fly: 8, charge: 1.4, breathe: 3.5, roar: 2.2 };
 
     /* ═══════════════ STATE ════════════════ */
     let canvas, ctx, W, H;
@@ -37,63 +37,110 @@
     let headRotOffset = 0; // Smooth head tilt offset
     let userInterrupted = false; // Track manual fire-breathing override
 
+    let isMobile = false;
+    let scaleCache = null;
+    let lastTheme = null;
+
     /* ═══════════════ PALETTE ══════════════ */
     const isL = () => document.body.classList.contains('light-mode');
 
     function C() {
         const L = isL();
         return {
-            body   : L ? '#22c99e' : '#cc2000', // Teal in light mode, Crimson Red in dark mode
-            bodyD  : L ? '#0f766e' : '#7a1000',
-            bodyH  : L ? '#5eead4' : '#ff5533',
-            belly  : L ? '#f0fdfa' : '#ff9966', // Warm underbelly in dark mode
-            bellyH : L ? '#ffffff' : '#ffcc99',
-            spine1 : L ? '#ea580c' : '#ff9900', // Bright orange spines
-            spine2 : L ? '#eab308' : '#ffcc00', // Yellow/orange spines
+            body: L ? '#22c99e' : '#cc2000', // Teal in light mode, Crimson Red in dark mode
+            bodyD: L ? '#0f766e' : '#7a1000',
+            bodyH: L ? '#5eead4' : '#ff5533',
+            belly: L ? '#f0fdfa' : '#ff9966', // Warm underbelly in dark mode
+            bellyH: L ? '#ffffff' : '#ffcc99',
+            spine1: L ? '#ea580c' : '#ff9900', // Bright orange spines
+            spine2: L ? '#eab308' : '#ffcc00', // Yellow/orange spines
             outline: L ? '#042f2e' : '#220000', // Deep outlines for contrast
-            eye    : L ? '#dc2626' : '#ffea00', // Glowing gold eyes in dark mode
-            pupil  : L ? '#000000' : '#000000',
+            eye: L ? '#dc2626' : '#ffea00', // Glowing gold eyes in dark mode
+            pupil: L ? '#000000' : '#000000',
             glowRGB: L ? '34,201,158' : '204,32,0',
-            fire   : L ? ['#ff4500','#ffa500','#ffcc00','#ffeedd']
-                       : ['#ff1100','#ff5500','#ffaa00','#ffee55'],
-            fireG  : L ? 'rgba(255,69,0,0.6)' : 'rgba(255,50,0,0.7)',
+            fire: L ? ['#ff4500', '#ffa500', '#ffcc00', '#ffeedd']
+                : ['#ff1100', '#ff5500', '#ffaa00', '#ffee55'],
+            fireG: L ? 'rgba(255,69,0,0.6)' : 'rgba(255,50,0,0.7)',
         };
+    }
+
+    /* ═══════════════ CACHE GENERATOR ═══════ */
+    function buildScaleCache() {
+        if (!scaleCache) {
+            scaleCache = document.createElement('canvas');
+        }
+        scaleCache.width = 128;
+        scaleCache.height = 128;
+        const sCtx = scaleCache.getContext('2d');
+        const c = C();
+
+        const w = 128, h = 128;
+        const cx = w / 2, cy = h / 2;
+        const scW = 50, scH = 50;
+
+        sCtx.clearRect(0, 0, w, h);
+        sCtx.save();
+        sCtx.translate(cx, cy);
+
+        sCtx.beginPath();
+        sCtx.moveTo(-scW * 0.675, -scH);
+        sCtx.quadraticCurveTo(scW * 0.425, -scH, scW * 0.675, 0);
+        sCtx.quadraticCurveTo(scW * 0.425, scH, -scW * 0.675, scH);
+        sCtx.quadraticCurveTo(-scW * 0.325, 0, -scW * 0.675, -scH);
+        sCtx.closePath();
+
+        const scGrad = sCtx.createRadialGradient(-scW * 0.375, -scH * 0.2, 0, -scW * 0.175, 0, scW);
+        scGrad.addColorStop(0, c.bodyH);
+        scGrad.addColorStop(0.65, c.body);
+        scGrad.addColorStop(1, c.bodyD);
+
+        sCtx.fillStyle = scGrad;
+        sCtx.fill();
+
+        sCtx.strokeStyle = c.bodyD;
+        sCtx.lineWidth = 1.0;
+        sCtx.stroke();
+        sCtx.restore();
+
+        lastTheme = isL();
     }
 
     /* ═══════════════ RESIZE (HiDPI) ═══════ */
     function resize() {
         const dpr = window.devicePixelRatio || 1;
-        W = window.innerWidth || 800; 
+        W = window.innerWidth || 800;
         H = window.innerHeight || 600;
         canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
         canvas.width = W * dpr; canvas.height = H * dpr;
         ctx.scale(dpr, dpr);
+        isMobile = W < 768;
+        buildScaleCache();
         buildLUT(); // Rebuild LUT so coordinates scale to new window size
     }
 
     /* ═══════════════ PATH ═════════════════ */
-    function cr(p0,p1,p2,p3,t) {
-        const t2=t*t,t3=t2*t;
+    function cr(p0, p1, p2, p3, t) {
+        const t2 = t * t, t3 = t2 * t;
         return [
-            .5*((2*p1[0])+(-p0[0]+p2[0])*t+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3),
-            .5*((2*p1[1])+(-p0[1]+p2[1])*t+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3),
+            .5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
+            .5 * ((2 * p1[1]) + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3),
         ];
     }
     function pPos(t) {
-        const n=WP.length,i=Math.floor(t)%n,f=t-Math.floor(t);
-        const v=cr(WP[(i-1+n)%n],WP[i%n],WP[(i+1)%n],WP[(i+2)%n],f);
-        return {x:v[0]*W,y:v[1]*H};
+        const n = WP.length, i = Math.floor(t) % n, f = t - Math.floor(t);
+        const v = cr(WP[(i - 1 + n) % n], WP[i % n], WP[(i + 1) % n], WP[(i + 2) % n], f);
+        return { x: v[0] * W, y: v[1] * H };
     }
     function pAng(t) {
-        const a=pPos(t),b=pPos(t+.004);
-        return Math.atan2(b.y-a.y,b.x-a.x);
+        const a = pPos(t), b = pPos(t + .004);
+        return Math.atan2(b.y - a.y, b.x - a.x);
     }
 
     /* ═══════════════ PATH LUT GENERATOR ════ */
     function buildLUT() {
         if (W <= 0 || H <= 0) return;
         pathLUT = [];
-        
+
         // 1. High-resolution raw sampling along spline parameter t
         const rawSamples = [];
         const numSamples = 4000;
@@ -115,12 +162,12 @@
         }
 
         // 3. Resample the curve at exactly equal physical distances (every 3 pixels)
-        const stepDist = 3; 
+        const stepDist = 3;
         const numSteps = Math.floor(totalLength / stepDist);
 
         for (let i = 0; i < numSteps; i++) {
             const targetD = i * stepDist;
-            
+
             // Binary search to find the matching segment in the high-res samples
             let low = 0, high = numSamples;
             while (low < high) {
@@ -128,17 +175,17 @@
                 if (dists[mid] < targetD) low = mid + 1;
                 else high = mid;
             }
-            
+
             const idx = Math.max(1, low);
             const d0 = dists[idx - 1];
             const d1 = dists[idx];
             const ratio = (d1 - d0) > 0.0001 ? (targetD - d0) / (d1 - d0) : 0;
-            
+
             const p1 = rawSamples[idx - 1];
             const p2 = rawSamples[idx];
             const x = p1.x + (p2.x - p1.x) * ratio;
             const y = p1.y + (p2.y - p1.y) * ratio;
-            
+
             pathLUT.push({ x, y, angle: 0 });
         }
 
@@ -156,7 +203,7 @@
     /* ═══════════════ SEGMENT RADIUS ═══════ */
     function segR(i) {
         const t = i / (NUM_SEGS - 1);
-        const neck = i < 10 ? (0.65 + i * 0.035) : 1; 
+        const neck = i < 10 ? (0.65 + i * 0.035) : 1;
         return 18 * Math.pow(1 - t, 0.48) * neck;
     }
 
@@ -164,7 +211,7 @@
     function tickPath(dt) {
         if (!pathLUT.length) return;
         // Frame-rate independent speed: 145 pixels per second along the path
-        const speedInPixelsPerSecond = 170; 
+        const speedInPixelsPerSecond = 170;
         const speedInIndicesPerSecond = speedInPixelsPerSecond / 3.0; // 3px per index
         lutIndex += speedInIndicesPerSecond * dt;
         if (lutIndex >= pathLUT.length) lutIndex -= pathLUT.length;
@@ -172,14 +219,14 @@
 
     /* ═══════════════ SPINE POSITION ═══════ */
     function spine(i) {
-        if (!pathLUT.length) return {x: W * 0.5, y: H * 0.5, angle: 0};
+        if (!pathLUT.length) return { x: W * 0.5, y: H * 0.5, angle: 0 };
         const segSpacing = 5; // Exactly 5 * 3 = 15 pixels physical distance between segments!
         const rawIdx = Math.floor(lutIndex - i * segSpacing);
         const idx = ((rawIdx % pathLUT.length) + pathLUT.length) % pathLUT.length;
         const basePt = pathLUT[idx] || pathLUT[0];
 
         // Serpentine slithering wave perpendicular to the path
-        const waveFreq = 4.2; 
+        const waveFreq = 4.2;
         const waveAmp = 14 * Math.sin((i / NUM_SEGS) * Math.PI); // Strongest in the middle, 0 at head and tail
         const wave = Math.sin(time * waveFreq - i * 0.28) * waveAmp;
 
@@ -195,10 +242,10 @@
     function emitFire() {
         const h = spine(0);
         const headAng = h.angle + headRotOffset;
-        
+
         // Dynamic emission point matching the snout scaled by 1.85 and jawOpen displacement
-        const localX = 14 * 1.85; 
-        const localY = (jawOpen * 9) * 1.85; 
+        const localX = 14 * 1.85;
+        const localY = (jawOpen * 9) * 1.85;
 
         const cos = Math.cos(headAng);
         const sin = Math.sin(headAng);
@@ -206,12 +253,14 @@
         const my = h.y + (localX * sin + localY * cos);
         const c = C();
 
-        for (let i=0;i<10;i++) {
-            const pa = headAng + (Math.random() - 0.5) * 0.42; 
+        for (let i = 0; i < 10; i++) {
+            const pa = headAng + (Math.random() - 0.5) * 0.42;
             const spd = 9 + Math.random() * 12;
-            particles.push({x:mx,y:my,vx:Math.cos(pa)*spd,vy:Math.sin(pa)*spd-.6,
-                life:1,sz:15+Math.random()*20,col:c.fire[Math.floor(Math.random()**1.6*c.fire.length)],
-                rot:Math.random()*Math.PI*2,ember:Math.random()<.18});
+            particles.push({
+                x: mx, y: my, vx: Math.cos(pa) * spd, vy: Math.sin(pa) * spd - .6,
+                life: 1, sz: 15 + Math.random() * 20, col: c.fire[Math.floor(Math.random() ** 1.6 * c.fire.length)],
+                rot: Math.random() * Math.PI * 2, ember: Math.random() < .18
+            });
         }
     }
     function emitSparks() {
@@ -219,63 +268,66 @@
         const headAng = h.angle + headRotOffset;
         if (Math.random() > 0.45) return;
         const pa = headAng + (Math.random() - 0.5) * 0.95;
-        particles.push({x:h.x+Math.cos(headAng)*40,y:h.y+Math.sin(headAng)*40,
-            vx:Math.cos(pa)*3,vy:Math.sin(pa)*3-1,life:1,sz:8,col:C().fire[1],rot:0,ember:true});
+        particles.push({
+            x: h.x + Math.cos(headAng) * 40, y: h.y + Math.sin(headAng) * 40,
+            vx: Math.cos(pa) * 3, vy: Math.sin(pa) * 3 - 1, life: 1, sz: 8, col: C().fire[1], rot: 0, ember: true
+        });
     }
     function tickParticles(dt) {
-        for (let i=particles.length-1;i>=0;i--) {
-            const p=particles[i];
-            p.x+=p.vx;p.y+=p.vy;p.vy-=.13;p.vx*=.97;
-            p.life-=dt*(p.ember?1.1:.7);p.sz*=.975;p.rot+=.06;
-            if (p.life<=0||p.sz<.4) particles.splice(i,1);
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx; p.y += p.vy; p.vy -= .13; p.vx *= .97;
+            p.life -= dt * (p.ember ? 1.1 : .7); p.sz *= .975; p.rot += .06;
+            if (p.life <= 0 || p.sz < .4) particles.splice(i, 1);
         }
     }
 
     /* ═══════════════ SMOOTH PATH ══════════ */
-    function smPath(pts,cont) {
-        if (pts.length<2) return;
-        cont?ctx.lineTo(pts[0].x,pts[0].y):ctx.moveTo(pts[0].x,pts[0].y);
-        for (let i=1;i<pts.length-1;i++)
-            ctx.quadraticCurveTo(pts[i].x,pts[i].y,(pts[i].x+pts[i+1].x)/2,(pts[i].y+pts[i+1].y)/2);
-        ctx.lineTo(pts[pts.length-1].x,pts[pts.length-1].y);
+    function smPath(pts, cont) {
+        if (pts.length < 2) return;
+        cont ? ctx.lineTo(pts[0].x, pts[0].y) : ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length - 1; i++)
+            ctx.quadraticCurveTo(pts[i].x, pts[i].y, (pts[i].x + pts[i + 1].x) / 2, (pts[i].y + pts[i + 1].y) / 2);
+        ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
     }
 
     /* ═══════════════ DRAW: PARTICLES ══════ */
-    function h2r(h){
-        if(h==='#fff'||h==='#ffffff')return[255,255,255];
-        const m=/^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h);
-        return m?[parseInt(m[1],16),parseInt(m[2],16),parseInt(m[3],16)]:[255,165,0];
+    function h2r(h) {
+        if (h === '#fff' || h === '#ffffff') return [255, 255, 255];
+        const m = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h);
+        return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [255, 165, 0];
     }
     function drawParticles() {
-        particles.forEach(p=>{
-            if(!p.ember){
-                ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);
-                const[r,g,b]=h2r(p.col);
-                const gr=ctx.createRadialGradient(0,0,0,0,0,p.sz);
-                gr.addColorStop(0,`rgba(255,255,200,${p.life})`);
-                gr.addColorStop(.35,`rgba(${r},${g},${b},${p.life*.85})`);
-                gr.addColorStop(1,`rgba(${r},${g},${b},0)`);
-                ctx.fillStyle=gr;ctx.beginPath();ctx.arc(0,0,p.sz,0,Math.PI*2);ctx.fill();ctx.restore();
+        particles.forEach(p => {
+            if (!p.ember) {
+                ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+                const [r, g, b] = h2r(p.col);
+                const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, p.sz);
+                gr.addColorStop(0, `rgba(255,255,200,${p.life})`);
+                gr.addColorStop(.35, `rgba(${r},${g},${b},${p.life * .85})`);
+                gr.addColorStop(1, `rgba(${r},${g},${b},0)`);
+                ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(0, 0, p.sz, 0, Math.PI * 2); ctx.fill(); ctx.restore();
             } else {
-                ctx.save();ctx.shadowBlur=10;ctx.shadowColor=p.col;
-                ctx.fillStyle='#ffee66';ctx.beginPath();ctx.arc(p.x,p.y,Math.max(1,p.sz*.15),0,Math.PI*2);
-                ctx.fill();ctx.restore();
+                ctx.save(); ctx.shadowBlur = 10; ctx.shadowColor = p.col;
+                ctx.fillStyle = '#ffee66'; ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(1, p.sz * .15), 0, Math.PI * 2);
+                ctx.fill(); ctx.restore();
             }
         });
     }
 
     /* ═══════════════ DRAW: GLOW TRAIL ═════ */
     function drawTrail() {
-        const rgb=C().glowRGB;
-        ctx.save();ctx.globalAlpha=.07;
-        const lim=Math.min(55, NUM_SEGS);
-        for (let i=0;i<lim;i++) {
-            const h=spine(i),fade=1-i/lim;
-            const r=segR(Math.min(i,NUM_SEGS-1))*1.5*fade;
-            if(r<2) continue;
-            const gr=ctx.createRadialGradient(h.x,h.y,0,h.x,h.y,r);
-            gr.addColorStop(0,`rgba(${rgb},1)`);gr.addColorStop(1,`rgba(${rgb},0)`);
-            ctx.fillStyle=gr;ctx.beginPath();ctx.arc(h.x,h.y,r,0,Math.PI*2);ctx.fill();
+        if (isMobile) return;
+        const rgb = C().glowRGB;
+        ctx.save(); ctx.globalAlpha = .07;
+        const lim = Math.min(55, NUM_SEGS);
+        for (let i = 0; i < lim; i++) {
+            const h = spine(i), fade = 1 - i / lim;
+            const r = segR(Math.min(i, NUM_SEGS - 1)) * 1.5 * fade;
+            if (r < 2) continue;
+            const gr = ctx.createRadialGradient(h.x, h.y, 0, h.x, h.y, r);
+            gr.addColorStop(0, `rgba(${rgb},1)`); gr.addColorStop(1, `rgba(${rgb},0)`);
+            ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(h.x, h.y, r, 0, Math.PI * 2); ctx.fill();
         }
         ctx.restore();
     }
@@ -307,7 +359,7 @@
 
         const tTime = time * 3.0 + idx * 0.5;
         const sweep = Math.sin(tTime) * 0.35;
-        
+
         const thighAngle = s.angle + side * Math.PI * 0.52 + sweep;
         const thighLen = r * 1.35;
         const kx = bx + Math.cos(thighAngle) * thighLen;
@@ -333,10 +385,10 @@
             ky + Math.sin(footAngle - side * 0.35) * r * 0.6,
             fx, fy
         );
-        ctx.lineTo(fx + Math.cos(footAngle + Math.PI/2) * r * 0.25, fy + Math.sin(footAngle + Math.PI/2) * r * 0.25);
+        ctx.lineTo(fx + Math.cos(footAngle + Math.PI / 2) * r * 0.25, fy + Math.sin(footAngle + Math.PI / 2) * r * 0.25);
         ctx.quadraticCurveTo(
-            kx + Math.cos(footAngle + Math.PI/2) * r * 0.3,
-            ky + Math.sin(footAngle + Math.PI/2) * r * 0.3,
+            kx + Math.cos(footAngle + Math.PI / 2) * r * 0.3,
+            ky + Math.sin(footAngle + Math.PI / 2) * r * 0.3,
             kx, ky
         );
         ctx.quadraticCurveTo(
@@ -359,7 +411,7 @@
         ctx.strokeStyle = c.bodyH;
         ctx.lineWidth = r * 0.14;
         ctx.stroke();
-        
+
         ctx.restore();
 
         ctx.save();
@@ -396,101 +448,103 @@
 
     /* ═══════════════ DRAW: BODY ═══════════ */
     function drawBody() {
-        const c=C();
-        const n=NUM_SEGS;
+        const c = C();
+        const n = NUM_SEGS;
 
-        const up=[],lo=[];
-        for (let i=0;i<n;i++) {
-            const s=spine(i),r=segR(i);
-            const px=Math.cos(s.angle-Math.PI/2),py=Math.sin(s.angle-Math.PI/2);
-            up.push({x:s.x+px*r,y:s.y+py*r});
-            lo.push({x:s.x-px*r,y:s.y-py*r});
+        const up = [], lo = [];
+        for (let i = 0; i < n; i++) {
+            const s = spine(i), r = segR(i);
+            const px = Math.cos(s.angle - Math.PI / 2), py = Math.sin(s.angle - Math.PI / 2);
+            up.push({ x: s.x + px * r, y: s.y + py * r });
+            lo.push({ x: s.x - px * r, y: s.y - py * r });
         }
 
         // ── 1. MAIN BODY FILL ──
         ctx.save();
-        ctx.beginPath();smPath(up,false);smPath([...lo].reverse(),true);ctx.closePath();
-        
+        ctx.beginPath(); smPath(up, false); smPath([...lo].reverse(), true); ctx.closePath();
+
         // Multi-stop HD gradient for body depth shading
         const grad = ctx.createLinearGradient(up[0].x, up[0].y, lo[0].x, lo[0].y);
         grad.addColorStop(0, c.bodyH);
         grad.addColorStop(0.4, c.body);
         grad.addColorStop(1, c.bodyD);
-        
-        ctx.fillStyle=grad;
-        ctx.shadowBlur=16;ctx.shadowColor=`rgba(${c.glowRGB},0.35)`;
-        ctx.fill();ctx.shadowBlur=0;
+
+        ctx.fillStyle = grad;
+        ctx.shadowBlur = 16; ctx.shadowColor = `rgba(${c.glowRGB},0.35)`;
+        ctx.fill(); ctx.shadowBlur = 0;
         ctx.restore();
 
         // ── 2. BACK STRIPE ──
         ctx.save();
-        const backEdge=[];
-        for (let i=0;i<n;i++) {
-            const s=spine(i),r=segR(i)*0.36;
-            const px=Math.cos(s.angle-Math.PI/2),py=Math.sin(s.angle-Math.PI/2);
-            backEdge.push({x:s.x+px*r,y:s.y+py*r});
+        const backEdge = [];
+        for (let i = 0; i < n; i++) {
+            const s = spine(i), r = segR(i) * 0.36;
+            const px = Math.cos(s.angle - Math.PI / 2), py = Math.sin(s.angle - Math.PI / 2);
+            backEdge.push({ x: s.x + px * r, y: s.y + py * r });
         }
-        ctx.beginPath();smPath(up,false);smPath([...backEdge].reverse(),true);ctx.closePath();
-        ctx.fillStyle=c.bodyD;ctx.globalAlpha=0.5;ctx.fill();ctx.globalAlpha=1;
+        ctx.beginPath(); smPath(up, false); smPath([...backEdge].reverse(), true); ctx.closePath();
+        ctx.fillStyle = c.bodyD; ctx.globalAlpha = 0.5; ctx.fill(); ctx.globalAlpha = 1;
         ctx.restore();
 
         // ── 3. HIGHLIGHT LINE ──
         ctx.save();
-        ctx.beginPath();smPath(up,false);
-        const maxR=segR(Math.floor(n/3));
-        ctx.strokeStyle=c.bodyH;
-        ctx.lineWidth=Math.max(2.0,maxR*0.22);
-        ctx.globalAlpha=0.6;ctx.lineCap='round';ctx.lineJoin='round';
-        ctx.stroke();ctx.globalAlpha=1;
+        ctx.beginPath(); smPath(up, false);
+        const maxR = segR(Math.floor(n / 3));
+        ctx.strokeStyle = c.bodyH;
+        ctx.lineWidth = Math.max(2.0, maxR * 0.22);
+        ctx.globalAlpha = 0.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.stroke(); ctx.globalAlpha = 1;
         ctx.restore();
 
         // ── 4. BELLY STRIPE ──
         ctx.save();
-        const bellyEdge=[];
-        for (let i=0;i<n;i++) {
-            const s=spine(i),r=segR(i)*0.40;
-            const px=Math.cos(s.angle-Math.PI/2),py=Math.sin(s.angle-Math.PI/2);
-            bellyEdge.push({x:s.x-px*r,y:s.y-py*r});
+        const bellyEdge = [];
+        for (let i = 0; i < n; i++) {
+            const s = spine(i), r = segR(i) * 0.40;
+            const px = Math.cos(s.angle - Math.PI / 2), py = Math.sin(s.angle - Math.PI / 2);
+            bellyEdge.push({ x: s.x - px * r, y: s.y - py * r });
         }
-        ctx.beginPath();smPath(bellyEdge,false);smPath([...lo].reverse(),true);ctx.closePath();
-        
+        ctx.beginPath(); smPath(bellyEdge, false); smPath([...lo].reverse(), true); ctx.closePath();
+
         const bGrad = ctx.createLinearGradient(bellyEdge[0].x, bellyEdge[0].y, lo[0].x, lo[0].y);
         bGrad.addColorStop(0, c.bellyH);
         bGrad.addColorStop(1, c.belly);
-        ctx.fillStyle=bGrad;ctx.globalAlpha=0.85;ctx.fill();ctx.globalAlpha=1;
+        ctx.fillStyle = bGrad; ctx.globalAlpha = 0.85; ctx.fill(); ctx.globalAlpha = 1;
         ctx.restore();
 
         // ── 4b. BELLY PLATES (Distinct HD divisions) ──
         ctx.save();
-        ctx.beginPath();smPath(bellyEdge,false);smPath([...lo].reverse(),true);ctx.closePath();ctx.clip();
-        ctx.strokeStyle=c.outline;
-        ctx.lineWidth=1.0;
-        ctx.globalAlpha=0.5;
+        ctx.beginPath(); smPath(bellyEdge, false); smPath([...lo].reverse(), true); ctx.closePath(); ctx.clip();
+        ctx.strokeStyle = c.outline;
+        ctx.lineWidth = 1.0;
+        ctx.globalAlpha = 0.5;
         ctx.beginPath();
-        for (let i=0;i<n;i+=2.5) {
+        for (let i = 0; i < n; i += 2.5) {
             const idx = Math.floor(i);
             if (idx >= n) break;
-            ctx.moveTo(lo[idx].x,lo[idx].y);
-            ctx.lineTo(bellyEdge[idx].x,bellyEdge[idx].y);
+            ctx.moveTo(lo[idx].x, lo[idx].y);
+            ctx.lineTo(bellyEdge[idx].x, bellyEdge[idx].y);
         }
         ctx.stroke();
         ctx.restore();
 
         // ── 5. BELLY HIGHLIGHT LINE ──
         ctx.save();
-        ctx.beginPath();smPath(lo,false);
-        ctx.strokeStyle=c.bellyH;
-        ctx.lineWidth=Math.max(1.5,maxR*0.14);
-        ctx.globalAlpha=0.55;ctx.lineCap='round';ctx.lineJoin='round';
-        ctx.stroke();ctx.globalAlpha=1;
+        ctx.beginPath(); smPath(lo, false);
+        ctx.strokeStyle = c.bellyH;
+        ctx.lineWidth = Math.max(1.5, maxR * 0.14);
+        ctx.globalAlpha = 0.55; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.stroke(); ctx.globalAlpha = 1;
         ctx.restore();
 
         // ── 6. 3D OVERLAPPING SHINGLE SCALES ──
         ctx.save();
-        ctx.beginPath();smPath(up,false);smPath([...lo].reverse(),true);ctx.closePath();ctx.clip();
-        
+        ctx.beginPath(); smPath(up, false); smPath([...lo].reverse(), true); ctx.closePath(); ctx.clip();
+
         // Loop backwards from tail to head to layer scales naturally
-        for (let i = n - 2; i >= 1; i -= 0.35) {
+        const step = isMobile ? 0.9 : 0.35; // Fewer scale segments along body on mobile to save performance
+        
+        for (let i = n - 2; i >= 1; i -= step) {
             const idx = Math.floor(i);
             const s = spine(idx);
             const r = segR(idx) * 0.95;
@@ -500,38 +554,23 @@
             ctx.translate(s.x, s.y);
             ctx.rotate(s.angle + Math.PI);
             
-            // Staggered pattern: alternate rows between 5 and 6 scales to cover the entire body width (from -0.8r to +0.8r)
+            // Staggered pattern: fewer rows on mobile
             const isStaggered = (idx % 2 === 0);
-            const scalesNum = isStaggered ? 5 : 6;
+            const scalesNum = isMobile 
+                ? (isStaggered ? 3 : 4) 
+                : (isStaggered ? 5 : 6);
             
             for (let j = 0; j < scalesNum; j++) {
-                const sy = isStaggered 
-                    ? (j - 2) * r * 0.38 
-                    : (j - 2.5) * r * 0.32;
+                const sy = isMobile
+                    ? (isStaggered ? (j - 1) * r * 0.52 : (j - 1.5) * r * 0.45)
+                    : (isStaggered ? (j - 2) * r * 0.38 : (j - 2.5) * r * 0.32);
                 
-                const scW = r * 0.32; // Width of scale
-                const scH = r * 0.22; // Height of scale
+                const scW = isMobile ? r * 0.44 : r * 0.32; // Slightly wider scales on mobile to cover body gaps
+                const scH = isMobile ? r * 0.30 : r * 0.22; // Slightly taller scales on mobile
                 
-                ctx.beginPath();
-                // Overlapping teardrop/fish scale contour pointing towards the tail (+X)
-                ctx.moveTo(-scW * 0.5, sy - scH);
-                ctx.quadraticCurveTo(scW * 0.6, sy - scH, scW * 0.85, sy);
-                ctx.quadraticCurveTo(scW * 0.6, sy + scH, -scW * 0.5, sy + scH);
-                ctx.quadraticCurveTo(-scW * 0.15, sy, -scW * 0.5, sy - scH);
-                ctx.closePath();
-                
-                // Realistic 3D shading for each scale
-                const scGrad = ctx.createRadialGradient(-scW*0.2, sy - scH*0.2, 0, 0, sy, scW);
-                scGrad.addColorStop(0, c.bodyH);
-                scGrad.addColorStop(0.65, c.body);
-                scGrad.addColorStop(1, c.bodyD);
-                
-                ctx.fillStyle = scGrad;
-                ctx.fill();
-                
-                ctx.strokeStyle = c.bodyD;
-                ctx.lineWidth = 0.3;
-                ctx.stroke();
+                // Draw scale using offscreen canvas cache!
+                // Dest Rect: x = -scW * 0.5, y = sy - scH, w = scW * 1.35, h = scH * 2
+                ctx.drawImage(scaleCache, -scW * 0.5, sy - scH, scW * 1.35, scH * 2);
             }
             ctx.restore();
         }
@@ -539,37 +578,37 @@
 
         // ── 7. BODY OUTLINE (Thin & colored for realistic shading, no cartoon strokes) ──
         ctx.save();
-        ctx.beginPath();smPath(up,false);smPath([...lo].reverse(),true);ctx.closePath();
-        ctx.strokeStyle=c.bodyD;ctx.lineWidth=0.7;ctx.stroke();
+        ctx.beginPath(); smPath(up, false); smPath([...lo].reverse(), true); ctx.closePath();
+        ctx.strokeStyle = c.bodyD; ctx.lineWidth = 0.7; ctx.stroke();
         ctx.restore();
 
         // ── 8. DORSAL SPINES (Volumetric Flame Spikes) ──
         ctx.save();
-        for (let i=3;i<n-4;i+=2.5) {
+        for (let i = 3; i < n - 4; i += 2.5) {
             const idx = Math.floor(i);
-            const s=spine(idx),r=segR(idx);
-            if (r<4) continue;
-            const spH=r*1.85; 
-            const px=Math.cos(s.angle-Math.PI/2),py=Math.sin(s.angle-Math.PI/2);
-            
+            const s = spine(idx), r = segR(idx);
+            if (r < 4) continue;
+            const spH = r * 1.85;
+            const px = Math.cos(s.angle - Math.PI / 2), py = Math.sin(s.angle - Math.PI / 2);
+
             const wave = Math.sin(time * 3.5 + idx) * 3.5;
-            const tip={
-                x:up[idx].x+px*spH + Math.cos(s.angle)*wave,
-                y:up[idx].y+py*spH + Math.sin(s.angle)*wave
+            const tip = {
+                x: up[idx].x + px * spH + Math.cos(s.angle) * wave,
+                y: up[idx].y + py * spH + Math.sin(s.angle) * wave
             };
-            const b1=up[Math.max(0,idx-2)],b2=up[Math.min(n-1,idx+2)];
-            const col=(idx%2===0)?c.spine1:c.spine2;
-            
-            const fGr=ctx.createLinearGradient(up[idx].x,up[idx].y,tip.x,tip.y);
-            fGr.addColorStop(0,col);
-            fGr.addColorStop(0.5,c.spine1);
-            fGr.addColorStop(1,'rgba(239,68,68,0)');
-            
-            ctx.fillStyle=fGr;
-            ctx.strokeStyle=c.bodyD;
-            ctx.lineWidth=0.6;
+            const b1 = up[Math.max(0, idx - 2)], b2 = up[Math.min(n - 1, idx + 2)];
+            const col = (idx % 2 === 0) ? c.spine1 : c.spine2;
+
+            const fGr = ctx.createLinearGradient(up[idx].x, up[idx].y, tip.x, tip.y);
+            fGr.addColorStop(0, col);
+            fGr.addColorStop(0.5, c.spine1);
+            fGr.addColorStop(1, 'rgba(239,68,68,0)');
+
+            ctx.fillStyle = fGr;
+            ctx.strokeStyle = c.bodyD;
+            ctx.lineWidth = 0.6;
             ctx.beginPath();
-            ctx.moveTo(b1.x,b1.y);
+            ctx.moveTo(b1.x, b1.y);
             // Curved flame contour
             ctx.quadraticCurveTo(
                 up[idx].x + px * spH * 0.45 - Math.cos(s.angle) * spH * 0.22,
@@ -589,31 +628,31 @@
 
         // ── 9. HD TAIL PLUME (Extremely sharp and detailed feathered plume) ──
         ctx.save();
-        const sTail=spine(n-1);
-        ctx.translate(sTail.x,sTail.y);
-        ctx.rotate(sTail.angle+Math.PI);
-        const tTuft=time*2.5;
+        const sTail = spine(n - 1);
+        ctx.translate(sTail.x, sTail.y);
+        ctx.rotate(sTail.angle + Math.PI);
+        const tTuft = time * 2.5;
         // Tail fan plume lines
-        for (let j=0;j<7;j++) {
-            const angOff=(j-3)*0.16 + Math.sin(tTuft+j)*0.1;
-            const hairLen=45 + Math.sin(tTuft)*5 - Math.abs(j-3)*4;
+        for (let j = 0; j < 7; j++) {
+            const angOff = (j - 3) * 0.16 + Math.sin(tTuft + j) * 0.1;
+            const hairLen = 45 + Math.sin(tTuft) * 5 - Math.abs(j - 3) * 4;
             ctx.save();
             ctx.rotate(angOff);
             ctx.beginPath();
-            ctx.moveTo(0,0);
-            ctx.bezierCurveTo(hairLen*0.4,-5,hairLen*0.8,-3,hairLen,0);
-            ctx.bezierCurveTo(hairLen*0.8,3,hairLen*0.4,5,0,0);
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(hairLen * 0.4, -5, hairLen * 0.8, -3, hairLen, 0);
+            ctx.bezierCurveTo(hairLen * 0.8, 3, hairLen * 0.4, 5, 0, 0);
             ctx.closePath();
-            
-            const tfGr=ctx.createLinearGradient(0,0,hairLen,0);
+
+            const tfGr = ctx.createLinearGradient(0, 0, hairLen, 0);
             tfGr.addColorStop(0, c.spine1);
             tfGr.addColorStop(0.5, c.spine2);
-            tfGr.addColorStop(1,'rgba(255,255,255,0)');
-            ctx.fillStyle=tfGr;
+            tfGr.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = tfGr;
             ctx.fill();
-            
-            ctx.strokeStyle=c.outline;
-            ctx.lineWidth=1.0;
+
+            ctx.strokeStyle = c.outline;
+            ctx.lineWidth = 1.0;
             ctx.stroke();
             ctx.restore();
         }
@@ -622,31 +661,31 @@
 
     /* ═══════════════ DRAW: HEAD ═══════════ */
     function drawHead() {
-        const c=C(),h=spine(0),ang=h.angle,T=time;
+        const c = C(), h = spine(0), ang = h.angle, T = time;
 
-        let targetJaw=0;
-        if      (state==='breathe') targetJaw=0.9; // Much wider organic jaw opening
-        else if (state==='charge')  targetJaw=0.25;
-        else if (state==='roar')    targetJaw=0.9;
+        let targetJaw = 0;
+        if (state === 'breathe') targetJaw = 0.9; // Much wider organic jaw opening
+        else if (state === 'charge') targetJaw = 0.25;
+        else if (state === 'roar') targetJaw = 0.9;
         jawOpen += (targetJaw - jawOpen) * 0.12;
-        const jaw=jawOpen;
+        const jaw = jawOpen;
 
-        const rs=state==='roar'?1+Math.abs(Math.sin(stateTimer*4.5))*.12:1;
+        const rs = state === 'roar' ? 1 + Math.abs(Math.sin(stateTimer * 4.5)) * .12 : 1;
 
         ctx.save();
-        ctx.translate(h.x,h.y);
-        
+        ctx.translate(h.x, h.y);
+
         // Tilt head smoothly towards mouse (lerped headRotOffset)
         const headAng = ang + headRotOffset;
         ctx.rotate(headAng);
-        ctx.scale(1.85*rs,1.85*rs); // Elegant, proportioned head size
+        ctx.scale(1.85 * rs, 1.85 * rs); // Elegant, proportioned head size
 
         // Ambient glows removed to prevent unwanted shadows
-        if (state==='roar') {
-            const rw=(stateTimer%0.7)/0.7;
-            ctx.beginPath();ctx.arc(20,0,rw*72,0,Math.PI*2);
-            ctx.strokeStyle=`rgba(${c.glowRGB},${(1-rw)*.42})`;
-            ctx.lineWidth=2.5*(1-rw);ctx.stroke();
+        if (state === 'roar') {
+            const rw = (stateTimer % 0.7) / 0.7;
+            ctx.beginPath(); ctx.arc(20, 0, rw * 72, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(${c.glowRGB},${(1 - rw) * .42})`;
+            ctx.lineWidth = 2.5 * (1 - rw); ctx.stroke();
         }
 
         // ── FLOWING MANE ──
@@ -739,14 +778,14 @@
         ctx.quadraticCurveTo(22, -13, 26, -14);
         ctx.quadraticCurveTo(21, -8, 20, -3);
         ctx.closePath();
-        ctx.fill();ctx.stroke();
+        ctx.fill(); ctx.stroke();
         ctx.restore();
 
         // ── UPPER HEAD & SNOUT ──
         const jy = jaw * 18;
-        const hGr=ctx.createLinearGradient(-4,-20,-4,8);
-        hGr.addColorStop(0,c.bodyD);hGr.addColorStop(.45,c.body);hGr.addColorStop(1,c.bodyH);
-        ctx.fillStyle=hGr;ctx.strokeStyle=c.bodyD;ctx.lineWidth=0.6;
+        const hGr = ctx.createLinearGradient(-4, -20, -4, 8);
+        hGr.addColorStop(0, c.bodyD); hGr.addColorStop(.45, c.body); hGr.addColorStop(1, c.bodyH);
+        ctx.fillStyle = hGr; ctx.strokeStyle = c.bodyD; ctx.lineWidth = 0.6;
         ctx.beginPath();
         ctx.moveTo(26, -jy * 0.22);
         ctx.quadraticCurveTo(18, -10 - jy * 0.12, 10, -12);
@@ -755,50 +794,50 @@
         ctx.bezierCurveTo(-16, 6 - jy * 0.15, -8, 10, 0, 6 - jy * 0.3);
         ctx.quadraticCurveTo(12, 2 - jy * 0.2, 26, -jy * 0.22);
         ctx.closePath();
-        ctx.fill();ctx.stroke();
+        ctx.fill(); ctx.stroke();
 
         // ── LOWER JAW ──
-        if (jaw>.01) {
-            const ly=jaw*22; 
-            ctx.fillStyle=c.bodyD;ctx.strokeStyle=c.bodyD;ctx.lineWidth=0.6;
+        if (jaw > .01) {
+            const ly = jaw * 22;
+            ctx.fillStyle = c.bodyD; ctx.strokeStyle = c.bodyD; ctx.lineWidth = 0.6;
             ctx.beginPath();
             // The front tip of the jaw drops down the most (ly * 0.85), while the back joint (x=-15) remains stable (ly * 0.15)
             ctx.moveTo(22, ly * 0.85);
             ctx.bezierCurveTo(15, ly * 0.8, 4, ly * 0.6, -4, ly * 0.45);
             ctx.bezierCurveTo(-14, ly * 0.35, -18, ly * 0.2, -15, ly * 0.15);
             ctx.bezierCurveTo(-10, ly * 0.18, 9, ly * 0.45, 21, ly * 0.8);
-            ctx.closePath();ctx.fill();ctx.stroke();
-            
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+
             // Mouth interior
-            const iGr=ctx.createLinearGradient(22, ly * 0.8, -14, ly * 0.25);
-            iGr.addColorStop(0,'#991b1b');
-            iGr.addColorStop(1,'#450a0a'); 
-            ctx.fillStyle=iGr;ctx.beginPath();
+            const iGr = ctx.createLinearGradient(22, ly * 0.8, -14, ly * 0.25);
+            iGr.addColorStop(0, '#991b1b');
+            iGr.addColorStop(1, '#450a0a');
+            ctx.fillStyle = iGr; ctx.beginPath();
             ctx.moveTo(21, ly * 0.8);
             ctx.bezierCurveTo(12, ly * 0.6, 2, ly * 0.4, -6, ly * 0.3);
             ctx.bezierCurveTo(-12, ly * 0.28, -14, ly * 0.2, -12, ly * 0.12);
             ctx.bezierCurveTo(-6, ly * 0.22, 10, ly * 0.42, 21, ly * 0.8);
-            ctx.closePath();ctx.fill();
-            
+            ctx.closePath(); ctx.fill();
+
             // Small, natural, sharp fangs
-            ctx.fillStyle='#ffffff';
-            for (let k=0;k<4;k++){
-                const tx=16-k*5,ty=2-jy*.2;
-                const fangH = (k === 0 || k === 3) ? jaw*5 : jaw*3;
+            ctx.fillStyle = '#ffffff';
+            for (let k = 0; k < 4; k++) {
+                const tx = 16 - k * 5, ty = 2 - jy * .2;
+                const fangH = (k === 0 || k === 3) ? jaw * 5 : jaw * 3;
                 ctx.beginPath();
-                ctx.moveTo(tx-1.0,ty);
-                ctx.lineTo(tx,ty+fangH);
-                ctx.lineTo(tx+1.0,ty);
+                ctx.moveTo(tx - 1.0, ty);
+                ctx.lineTo(tx, ty + fangH);
+                ctx.lineTo(tx + 1.0, ty);
                 ctx.closePath();
                 ctx.fill();
             }
-            for (let k=0;k<3;k++){
-                const tx=13-k*5;
+            for (let k = 0; k < 3; k++) {
+                const tx = 13 - k * 5;
                 const toothY = ly * 0.5;
                 ctx.beginPath();
-                ctx.moveTo(tx-0.8, toothY);
+                ctx.moveTo(tx - 0.8, toothY);
                 ctx.lineTo(tx, toothY - jaw * 4);
-                ctx.lineTo(tx+0.8, toothY);
+                ctx.lineTo(tx + 0.8, toothY);
                 ctx.closePath();
                 ctx.fill();
             }
@@ -807,11 +846,11 @@
         // ── FIERCE REPTILIAN EYES ──
         const ey = -12;
         ctx.save();
-        
+
         // Slanted, angry glowing eye shape
         ctx.beginPath();
         ctx.moveTo(-2, ey + 3);
-        ctx.lineTo(13, ey - 4); 
+        ctx.lineTo(13, ey - 4);
         ctx.lineTo(9, ey + 4);
         ctx.lineTo(-2, ey + 3);
         ctx.closePath();
@@ -846,7 +885,7 @@
         ctx.fillStyle = c.bodyD;
         ctx.strokeStyle = c.outline;
         ctx.lineWidth = 1.1;
-        
+
         // Top jaw spike
         ctx.beginPath();
         ctx.moveTo(-11, 2);
@@ -854,7 +893,7 @@
         ctx.lineTo(-15, -2);
         ctx.closePath();
         ctx.fill(); ctx.stroke();
-        
+
         // Bottom jaw spike
         ctx.beginPath();
         ctx.moveTo(-13, -3);
@@ -866,38 +905,38 @@
 
         // ── FLOWING WHISKERS ──
         ctx.save();
-        ctx.strokeStyle=c.spine2;
-        ctx.lineWidth=1.5;
-        ctx.lineCap='round';
+        ctx.strokeStyle = c.spine2;
+        ctx.lineWidth = 1.5;
+        ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.moveTo(20,-2);
+        ctx.moveTo(20, -2);
         ctx.bezierCurveTo(
-            36,-10+Math.sin(T*4.5)*5,
-            -12,-26+Math.cos(T*3.5)*7,
-            -52,-18+Math.sin(T*2.2)*10
+            36, -10 + Math.sin(T * 4.5) * 5,
+            -12, -26 + Math.cos(T * 3.5) * 7,
+            -52, -18 + Math.sin(T * 2.2) * 10
         );
         ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(20,2);
+        ctx.moveTo(20, 2);
         ctx.bezierCurveTo(
-            36,10-Math.sin(T*4.5)*5,
-            -12,26-Math.cos(T*3.5)*7,
-            -52,18-Math.sin(T*2.2)*10
+            36, 10 - Math.sin(T * 4.5) * 5,
+            -12, 26 - Math.cos(T * 3.5) * 7,
+            -52, 18 - Math.sin(T * 2.2) * 10
         );
         ctx.stroke();
         ctx.restore();
 
         // ── NOSTRILS ──
-        ctx.fillStyle=c.bodyD;
-        ctx.beginPath();ctx.ellipse(19,-3.5,2.2,1.5,.3,0,Math.PI*2);ctx.fill();
-        ctx.beginPath();ctx.ellipse(19,3.5,2.2,1.5,-.3,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle = c.bodyD;
+        ctx.beginPath(); ctx.ellipse(19, -3.5, 2.2, 1.5, .3, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(19, 3.5, 2.2, 1.5, -.3, 0, Math.PI * 2); ctx.fill();
 
         // ── CHARGE SMOKE ──
-        if (state==='charge') {
-            const prog=Math.min(1,stateTimer/DUR.charge);
-            for (let k=0;k<5;k++) {
-                ctx.fillStyle=`rgba(200,200,200,${prog*(0.3-k*.05)})`;
-                ctx.beginPath();ctx.arc(22+k*3,-5-k*3+Math.sin(T*5+k)*1.5,3-k*.3,0,Math.PI*2);ctx.fill();
+        if (state === 'charge') {
+            const prog = Math.min(1, stateTimer / DUR.charge);
+            for (let k = 0; k < 5; k++) {
+                ctx.fillStyle = `rgba(200,200,200,${prog * (0.3 - k * .05)})`;
+                ctx.beginPath(); ctx.arc(22 + k * 3, -5 - k * 3 + Math.sin(T * 5 + k) * 1.5, 3 - k * .3, 0, Math.PI * 2); ctx.fill();
             }
         }
         ctx.restore();
@@ -929,11 +968,15 @@
     /* ═══════════════ MAIN LOOP ════════════ */
     function frame(ts) {
         try {
-            frameId=requestAnimationFrame(frame);
+            frameId = requestAnimationFrame(frame);
             if (!lastTs) lastTs = ts;
-            const dt=Math.min((ts-lastTs)/1000,.08);
-            lastTs=ts;time+=dt*1.1;
-            tickPath(dt);tickState(dt);
+            const dt = Math.min((ts - lastTs) / 1000, .08);
+            lastTs = ts; time += dt * 1.1;
+            tickPath(dt); tickState(dt);
+
+            if (isL() !== lastTheme) {
+                buildScaleCache();
+            }
 
             // Update smooth headRotOffset tracking safely
             if (pathLUT.length) {
@@ -950,16 +993,16 @@
                 if (isNaN(headRotOffset)) headRotOffset = 0;
             }
 
-            if (state==='breathe') emitFire();
-            if (state==='charge')  emitSparks();
+            if (state === 'breathe') emitFire();
+            if (state === 'charge') emitSparks();
             tickParticles(dt);
-            ctx.clearRect(0,0,W,H);
-            
+            ctx.clearRect(0, 0, W, H);
+
             drawTrail();
             drawParticles();
-            drawLegs(false); 
+            drawLegs(false);
             drawBody();
-            drawLegs(true);  
+            drawLegs(true);
             drawHead();
         } catch (e) {
             console.error("DRAGON RUNTIME ERROR:", e);
@@ -969,11 +1012,11 @@
 
     /* ═══════════════ INIT ═════════════════ */
     function init() {
-        canvas=document.getElementById('dragon-canvas');
+        canvas = document.getElementById('dragon-canvas');
         if (!canvas) return;
-        ctx=canvas.getContext('2d');
+        ctx = canvas.getContext('2d');
         resize();
-        window.addEventListener('resize',resize);
+        window.addEventListener('resize', resize);
 
         // Keep track of pointer movements
         window.addEventListener('pointermove', function (e) {
@@ -998,9 +1041,9 @@
             isMouseDown = false;
         });
 
-        requestAnimationFrame(ts=>{lastTs=ts;requestAnimationFrame(frame);});
+        requestAnimationFrame(ts => { lastTs = ts; requestAnimationFrame(frame); });
     }
 
-    if (document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
 })();
