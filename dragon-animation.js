@@ -10,7 +10,7 @@
     'use strict';
 
     /* ═══════════════ CONFIG ═══════════════ */
-    const NUM_SEGS = 48; // Shorter, balanced body length
+    let numSegs = 48; // Shorter, balanced body length
     const LUT_SPEED = 1.3; // Constant speed along the LUT path
 
     const WP = [
@@ -202,7 +202,7 @@
 
     /* ═══════════════ SEGMENT RADIUS ═══════ */
     function segR(i) {
-        const t = i / (NUM_SEGS - 1);
+        const t = i / (numSegs - 1);
         const neck = i < 10 ? (0.65 + i * 0.035) : 1;
         return 18 * Math.pow(1 - t, 0.48) * neck;
     }
@@ -227,7 +227,7 @@
 
         // Serpentine slithering wave perpendicular to the path
         const waveFreq = 4.2;
-        const waveAmp = 14 * Math.sin((i / NUM_SEGS) * Math.PI); // Strongest in the middle, 0 at head and tail
+        const waveAmp = 14 * Math.sin((i / numSegs) * Math.PI); // Strongest in the middle, 0 at head and tail
         const wave = Math.sin(time * waveFreq - i * 0.28) * waveAmp;
 
         const perpAng = basePt.angle + Math.PI / 2;
@@ -253,7 +253,8 @@
         const my = h.y + (localX * sin + localY * cos);
         const c = C();
 
-        for (let i = 0; i < 10; i++) {
+        const count = isMobile ? 3 : 10;
+        for (let i = 0; i < count; i++) {
             const pa = headAng + (Math.random() - 0.5) * 0.42;
             const spd = 9 + Math.random() * 12;
             particles.push({
@@ -300,17 +301,33 @@
     function drawParticles() {
         particles.forEach(p => {
             if (!p.ember) {
-                ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
-                const [r, g, b] = h2r(p.col);
-                const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, p.sz);
-                gr.addColorStop(0, `rgba(255,255,200,${p.life})`);
-                gr.addColorStop(.35, `rgba(${r},${g},${b},${p.life * .85})`);
-                gr.addColorStop(1, `rgba(${r},${g},${b},0)`);
-                ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(0, 0, p.sz, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+                if (isMobile) {
+                    ctx.fillStyle = p.col;
+                    ctx.globalAlpha = p.life * 0.75;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.sz, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1.0;
+                } else {
+                    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+                    const [r, g, b] = h2r(p.col);
+                    const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, p.sz);
+                    gr.addColorStop(0, `rgba(255,255,200,${p.life})`);
+                    gr.addColorStop(.35, `rgba(${r},${g},${b},${p.life * .85})`);
+                    gr.addColorStop(1, `rgba(${r},${g},${b},0)`);
+                    ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(0, 0, p.sz, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+                }
             } else {
-                ctx.save(); ctx.shadowBlur = 10; ctx.shadowColor = p.col;
-                ctx.fillStyle = '#ffee66'; ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(1, p.sz * .15), 0, Math.PI * 2);
-                ctx.fill(); ctx.restore();
+                if (isMobile) {
+                    ctx.fillStyle = '#ffee66';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, Math.max(1, p.sz * .15), 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.save(); ctx.shadowBlur = 10; ctx.shadowColor = p.col;
+                    ctx.fillStyle = '#ffee66'; ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(1, p.sz * .15), 0, Math.PI * 2);
+                    ctx.fill(); ctx.restore();
+                }
             }
         });
     }
@@ -320,10 +337,10 @@
         if (isMobile) return;
         const rgb = C().glowRGB;
         ctx.save(); ctx.globalAlpha = .07;
-        const lim = Math.min(55, NUM_SEGS);
+        const lim = Math.min(55, numSegs);
         for (let i = 0; i < lim; i++) {
             const h = spine(i), fade = 1 - i / lim;
-            const r = segR(Math.min(i, NUM_SEGS - 1)) * 1.5 * fade;
+            const r = segR(Math.min(i, numSegs - 1)) * 1.5 * fade;
             if (r < 2) continue;
             const gr = ctx.createRadialGradient(h.x, h.y, 0, h.x, h.y, r);
             gr.addColorStop(0, `rgba(${rgb},1)`); gr.addColorStop(1, `rgba(${rgb},0)`);
@@ -335,8 +352,8 @@
     /* ═══════════════ DRAW: LEGS ═══════════ */
     function drawLegs(isForeground) {
         // Distribute legs nicely along the body (frontIdx and backIdx must have body radius >= 8px)
-        const frontIdx = 12;
-        const backIdx = 30;
+        const frontIdx = Math.floor(numSegs * 0.25);
+        const backIdx = Math.floor(numSegs * 0.62);
 
         if (isForeground) {
             drawLeg(frontIdx, 1, true);
@@ -426,7 +443,7 @@
         ctx.fill();
         ctx.stroke();
 
-        const clawNum = 4;
+        const clawNum = isMobile ? 3 : 4;
         for (let j = 0; j < clawNum; j++) {
             const clawAngle = (j - (clawNum - 1) / 2) * 0.4 + Math.sin(tTime + j) * 0.05;
             ctx.save();
@@ -449,7 +466,7 @@
     /* ═══════════════ DRAW: BODY ═══════════ */
     function drawBody() {
         const c = C();
-        const n = NUM_SEGS;
+        const n = numSegs;
 
         const up = [], lo = [];
         for (let i = 0; i < n; i++) {
@@ -519,7 +536,8 @@
         ctx.lineWidth = 1.0;
         ctx.globalAlpha = 0.5;
         ctx.beginPath();
-        for (let i = 0; i < n; i += 2.5) {
+        const bellyStep = isMobile ? 5 : 2.5;
+        for (let i = 0; i < n; i += bellyStep) {
             const idx = Math.floor(i);
             if (idx >= n) break;
             ctx.moveTo(lo[idx].x, lo[idx].y);
@@ -584,7 +602,8 @@
 
         // ── 8. DORSAL SPINES (Volumetric Flame Spikes) ──
         ctx.save();
-        for (let i = 3; i < n - 4; i += 2.5) {
+        const spineStep = isMobile ? 5 : 2.5;
+        for (let i = 3; i < n - 4; i += spineStep) {
             const idx = Math.floor(i);
             const s = spine(idx), r = segR(idx);
             if (r < 4) continue;
@@ -596,7 +615,8 @@
                 x: up[idx].x + px * spH + Math.cos(s.angle) * wave,
                 y: up[idx].y + py * spH + Math.sin(s.angle) * wave
             };
-            const b1 = up[Math.max(0, idx - 2)], b2 = up[Math.min(n - 1, idx + 2)];
+            const stepOffset = isMobile ? 3 : 2;
+            const b1 = up[Math.max(0, idx - stepOffset)], b2 = up[Math.min(n - 1, idx + stepOffset)];
             const col = (idx % 2 === 0) ? c.spine1 : c.spine2;
 
             const fGr = ctx.createLinearGradient(up[idx].x, up[idx].y, tip.x, tip.y);
@@ -633,9 +653,11 @@
         ctx.rotate(sTail.angle + Math.PI);
         const tTuft = time * 2.5;
         // Tail fan plume lines
-        for (let j = 0; j < 7; j++) {
-            const angOff = (j - 3) * 0.16 + Math.sin(tTuft + j) * 0.1;
-            const hairLen = 45 + Math.sin(tTuft) * 5 - Math.abs(j - 3) * 4;
+        const plumeCount = isMobile ? 4 : 7;
+        const plumeHalf = (plumeCount - 1) / 2;
+        for (let j = 0; j < plumeCount; j++) {
+            const angOff = (j - plumeHalf) * 0.20 + Math.sin(tTuft + j) * 0.1;
+            const hairLen = 45 + Math.sin(tTuft) * 5 - Math.abs(j - plumeHalf) * 4;
             ctx.save();
             ctx.rotate(angOff);
             ctx.beginPath();
@@ -693,7 +715,8 @@
         ctx.fillStyle = isL() ? '#f59e0b' : '#ff5500';
         ctx.strokeStyle = c.bodyD;
         ctx.lineWidth = 0.5;
-        for (let k = 0; k < 7; k++) {
+        const maneCount = isMobile ? 4 : 7;
+        for (let k = 0; k < maneCount; k++) {
             const mTime = T * 2.2 - k * 0.45;
             const mAngle = -Math.PI * 0.76 + Math.sin(mTime) * 0.16;
             ctx.save();
@@ -716,7 +739,8 @@
         ctx.lineWidth = 1.8;
         ctx.lineCap = 'round';
         const chinX = 0, chinY = 10 + jaw * 18;
-        for (let k = 0; k < 3; k++) {
+        const beardCount = isMobile ? 1 : 3;
+        for (let k = 0; k < beardCount; k++) {
             const bTime = T * 2.5 + k * 0.5;
             ctx.beginPath();
             ctx.moveTo(chinX, chinY);
