@@ -471,7 +471,7 @@ https://templatemo.com/tm-603-nexaverse
 
         <!-- Footer -->
         <footer class="footer" id="mainFooter">
-            <p>© 2025</p>
+            <p>© <span id="footerYear">2025</span></p>
         </footer>
     </div>
 
@@ -500,6 +500,7 @@ https://templatemo.com/tm-603-nexaverse
     <script src="templatemo-nexa-scripts.js"></script>
     <script>
         document.getElementById('currentYear').textContent = new Date().getFullYear();
+        document.getElementById('footerYear').textContent = new Date().getFullYear();
 
         let isPengalamanActive = true;
 
