@@ -355,3 +355,413 @@ document.addEventListener('keydown', (e) => {
       }
    }
 });
+
+/* ==========================================================================
+   INTERACTIVE CANVAS PARTICLE SYSTEM
+   ========================================================================== */
+let globalReinitParticles = null;
+
+function initCanvasParticles() {
+   const canvas = document.getElementById('particles-canvas');
+   if (!canvas) return;
+   const ctx = canvas.getContext('2d');
+   let particlesArray = [];
+   let mouse = {
+      x: null,
+      y: null,
+      radius: 120
+   };
+
+   function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+   }
+   window.addEventListener('resize', resizeCanvas);
+   resizeCanvas();
+
+   window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+   });
+
+   window.addEventListener('mouseleave', () => {
+      mouse.x = null;
+      mouse.y = null;
+   });
+
+   class Particle {
+      constructor(x, y, directionX, directionY, size, color) {
+         this.x = x;
+         this.y = y;
+         this.directionX = directionX;
+         this.directionY = directionY;
+         this.size = size;
+         this.color = color;
+         this.isRing = Math.random() > 0.5; // Used for Light Mode blueprint rings
+      }
+
+      draw() {
+         const isLight = document.body.classList.contains('light-mode');
+         ctx.beginPath();
+         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+         
+         if (isLight) {
+            if (this.isRing) {
+               ctx.strokeStyle = this.color;
+               ctx.lineWidth = 1.0;
+               ctx.stroke();
+            } else {
+               ctx.fillStyle = this.color;
+               ctx.fill();
+            }
+         } else {
+            ctx.fillStyle = this.color;
+            ctx.fill();
+         }
+      }
+
+      update() {
+         if (this.x > canvas.width || this.x < 0) {
+            this.directionX = -this.directionX;
+         }
+         if (this.y > canvas.height || this.y < 0) {
+            this.directionY = -this.directionY;
+         }
+
+         if (mouse.x !== null && mouse.y !== null) {
+            let dx = mouse.x - this.x;
+            let dy = mouse.y - this.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < mouse.radius) {
+               const force = (mouse.radius - distance) / mouse.radius;
+               this.x -= dx / distance * force * 2;
+               this.y -= dy / distance * force * 2;
+            }
+         }
+
+         this.x += this.directionX;
+         this.y += this.directionY;
+         this.draw();
+      }
+   }
+
+   function initParticles() {
+      particlesArray = [];
+      const isLight = document.body.classList.contains('light-mode');
+      
+      if (isLight) {
+         // Light Mode: Soft blueprint circles & floating rings
+         let numberOfParticles = Math.min((canvas.width * canvas.height) / 8000, 50);
+         for (let i = 0; i < numberOfParticles; i++) {
+            let size = Math.random() * 12 + 6;
+            let x = Math.random() * (canvas.width - size * 2) + size;
+            let y = Math.random() * (canvas.height - size * 2) + size;
+            let directionX = (Math.random() * 0.15) - 0.075;
+            let directionY = (Math.random() * 0.15) - 0.075;
+            let color = Math.random() > 0.5 ? 'rgba(30, 58, 138, 0.12)' : 'rgba(0, 119, 182, 0.10)';
+            particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+         }
+      } else {
+         // Dark Mode: Sharp constellation nodes
+         let numberOfParticles = Math.min((canvas.width * canvas.height) / 8000, 120);
+         for (let i = 0; i < numberOfParticles; i++) {
+            let size = Math.random() * 2 + 1;
+            let x = Math.random() * (canvas.width - size * 2) + size;
+            let y = Math.random() * (canvas.height - size * 2) + size;
+            let directionX = (Math.random() * 0.4) - 0.2;
+            let directionY = (Math.random() * 0.4) - 0.2;
+            let color = Math.random() > 0.5 ? 'rgba(0, 240, 255, 0.7)' : 'rgba(255, 0, 212, 0.6)';
+            particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+         }
+      }
+   }
+
+   function connect() {
+      const isLight = document.body.classList.contains('light-mode');
+      if (isLight) return; // No connections in Light Mode
+
+      let opacityValue = 1;
+      for (let a = 0; a < particlesArray.length; a++) {
+         for (let b = a; b < particlesArray.length; b++) {
+            let dx = particlesArray[a].x - particlesArray[b].x;
+            let dy = particlesArray[a].y - particlesArray[b].y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 120) {
+               opacityValue = 1 - (distance / 120);
+               ctx.strokeStyle = `rgba(0, 240, 255, ${opacityValue * 0.25})`;
+               ctx.lineWidth = 1.0;
+               ctx.beginPath();
+               ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+               ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+               ctx.stroke();
+            }
+         }
+      }
+   }
+
+   function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < particlesArray.length; i++) {
+         particlesArray[i].update();
+      }
+      connect();
+      requestAnimationFrame(animateParticles);
+   }
+
+   globalReinitParticles = initParticles;
+   initParticles();
+   animateParticles();
+   window.addEventListener('resize', initParticles);
+}
+
+/* ==========================================================================
+   3D TILT EFFECT
+   ========================================================================== */
+function init3DTilt() {
+   const tiltElements = document.querySelectorAll('.menu-item, .glass-card');
+   tiltElements.forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+         const rect = card.getBoundingClientRect();
+         const x = e.clientX - rect.left;
+         const y = e.clientY - rect.top;
+         const xc = rect.width / 2;
+         const yc = rect.height / 2;
+         const dx = x - xc;
+         const dy = y - yc;
+         
+         const maxRot = 12; // Degrees
+         const rx = -(dy / yc) * maxRot;
+         const ry = (dx / xc) * maxRot;
+
+         card.style.transition = 'transform 0.1s ease-out, box-shadow 0.1s ease-out, background 0.2s ease-out';
+         card.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.04, 1.04, 1.04)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+         card.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.5s ease, background 0.5s ease';
+         card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+      });
+   });
+}
+
+function init3DGridTilt() {
+   const gridOverlay = document.querySelector('.grid-overlay');
+   if (!gridOverlay) return;
+   
+   window.addEventListener('mousemove', (e) => {
+      // Calculate normalized mouse coordinates (-1 to 1)
+      const xAxis = (window.innerWidth / 2 - e.clientX) / (window.innerWidth / 2);
+      const yAxis = (window.innerHeight / 2 - e.clientY) / (window.innerHeight / 2);
+      
+      // Limit tilt angles for a subtle, professional effect
+      const tiltX = 60 + yAxis * 2.5; // rotateX defaults to 60deg
+      const tiltY = xAxis * 3;       // rotateY defaults to 0deg
+      
+      gridOverlay.style.transform = `perspective(500px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateY(-20%) translateZ(0)`;
+   });
+}
+
+/* ==========================================================================
+   TRANSLATION SYSTEM (ID/EN)
+   ========================================================================== */
+const translations = {
+   en: {
+      control_theme_dark: "DARK",
+      control_theme_light: "LIGHT",
+      brand_sub: "Informatics Engineering",
+      menu_intro_badge: "IN",
+      menu_intro: "Introduction",
+      menu_proj_badge: "PR",
+      menu_projects: "Projects",
+      menu_certs_badge: "CE",
+      menu_certs: "Certificates",
+      menu_contact_badge: "CO",
+      menu_contact: "Contact",
+      btn_back: "← Back to Menu",
+      intro_headline: "Self<br><span>Introduction</span>",
+      intro_desc: "I am a Web Developer with experience in Website development",
+      btn_exp: "Experience",
+      btn_edu: "Education",
+      badge_consistent: "Consistent",
+      badge_focused: "Focused",
+      exp_title: "Full Stack Developer",
+      exp_meta: "Internship (August 2024 - December 2024)",
+      exp_company: "National Research and Innovation Agency",
+      edu_title: "Diploma in Informatics Engineering",
+      edu_meta: "GPA: 3.51",
+      edu_school: "State Polytechnic of Cilacap (2022 - 2025)",
+      proj_title: "Projects",
+      proj_sub: "My Projects",
+      proj_simapus_desc: "Desktop-based Clinic Management Information System",
+      proj_rawatinap_desc: "Website-based Inpatient Clinic System",
+      proj_kuesioner_desc: "Codeigniter Website-based Questionnaire System",
+      proj_skincare_desc: "Skincare App Design",
+      cert_title: "Portfolio",
+      cert_sub: "Explore my certificates",
+      filter_all: "All",
+      filter_website: "Website",
+      filter_ai: "Artificial Intelligence",
+      filter_network: "Network",
+      filter_db: "Database",
+      contact_title: "Contact Me",
+      contact_sub: "Let's build something amazing together",
+      form_name: "Your Name",
+      form_email: "Your Email",
+      form_subject: "Subject",
+      form_message: "Your Message",
+      form_send: "Send Message",
+      loc_title: "Location",
+      loc_val: "Indonesia"
+   },
+   id: {
+      control_theme_dark: "GELAP",
+      control_theme_light: "TERANG",
+      brand_sub: "Teknik Informatika",
+      menu_intro_badge: "PR",
+      menu_intro: "Perkenalan",
+      menu_proj_badge: "PY",
+      menu_projects: "Proyek",
+      menu_certs_badge: "SF",
+      menu_certs: "Sertifikat",
+      menu_contact_badge: "KT",
+      menu_contact: "Kontak",
+      btn_back: "← Kembali ke Menu",
+      intro_headline: "Perkenalan<br><span>Diri</span>",
+      intro_desc: "Saya seorang Web Developer dengan pengalaman dalam pengembangan Website",
+      btn_exp: "Pengalaman",
+      btn_edu: "Pendidikan",
+      badge_consistent: "Konsisten",
+      badge_focused: "Fokus",
+      exp_title: "Full Stack Developer",
+      exp_meta: "Magang (Agustus 2024 - Desember 2024)",
+      exp_company: "Badan Riset dan Inovasi Nasional",
+      edu_title: "D3 Teknik Informatika",
+      edu_meta: "IPK: 3.51",
+      edu_school: "Politeknik Negeri Cilacap (2022 - 2025)",
+      proj_title: "Proyek",
+      proj_sub: "Proyek Saya",
+      proj_simapus_desc: "Sistem Informasi Manajemen Puskesmas Berbasis Desktop",
+      proj_rawatinap_desc: "Sistem Rawat Inap Berbasis Website",
+      proj_kuesioner_desc: "Sistem Informasi Kuesioner Berbasis Website Codeigniter",
+      proj_skincare_desc: "Desain Aplikasi Skincare",
+      cert_title: "Portofolio",
+      cert_sub: "Jelajahi Sertifikat saya",
+      filter_all: "Semua",
+      filter_website: "Website",
+      filter_ai: "Kecerdasan Buatan",
+      filter_network: "Jaringan",
+      filter_db: "Database",
+      contact_title: "Hubungi Saya",
+      contact_sub: "Mari kita ciptakan sesuatu yang luar biasa bersama",
+      form_name: "Nama Anda",
+      form_email: "Email Anda",
+      form_subject: "Subjek",
+      form_message: "Pesan Anda",
+      form_send: "Kirim Pesan",
+      loc_title: "Lokasi",
+      loc_val: "Indonesia"
+   }
+};
+
+let currentLang = localStorage.getItem('portfolio-lang') || 'id';
+
+function setLanguage(lang) {
+   currentLang = lang;
+   localStorage.setItem('portfolio-lang', lang);
+
+   const dict = translations[lang];
+
+   // Translate textContent
+   document.querySelectorAll('[data-translate]').forEach(el => {
+      const key = el.getAttribute('data-translate');
+      if (dict[key]) {
+         if (key === 'intro_headline') {
+            el.innerHTML = dict[key];
+         } else {
+            el.textContent = dict[key];
+         }
+      }
+   });
+
+   // Translate placeholders
+   document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-translate-placeholder');
+      if (dict[key]) {
+         el.placeholder = dict[key];
+      }
+   });
+
+   // Translate theme toggle button text explicitly depending on state
+   const isLight = document.body.classList.contains('light-mode');
+   const themeBtnText = document.querySelector('#themeToggle .btn-text');
+   if (themeBtnText) {
+      themeBtnText.textContent = isLight ? dict['control_theme_light'] : dict['control_theme_dark'];
+   }
+
+   // Update Lang toggle button text
+   const langBtnText = document.querySelector('#langToggle .btn-text');
+   if (langBtnText) {
+      langBtnText.textContent = lang.toUpperCase();
+   }
+}
+
+/* ==========================================================================
+   THEME SWITCHING SYSTEM (LIGHT/DARK)
+   ========================================================================== */
+function initThemeSystem() {
+   const themeToggleBtn = document.getElementById('themeToggle');
+   const langToggleBtn = document.getElementById('langToggle');
+
+   // Set initial theme
+   const savedTheme = localStorage.getItem('portfolio-theme') || 'dark';
+   if (savedTheme === 'light') {
+      document.body.classList.add('light-mode');
+      const icon = themeToggleBtn.querySelector('.btn-icon');
+      if (icon) icon.textContent = '☀️';
+   }
+
+   // Set initial language
+   setLanguage(currentLang);
+
+   // Theme Toggle Click Handler
+   if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', () => {
+         const isLight = document.body.classList.toggle('light-mode');
+         localStorage.setItem('portfolio-theme', isLight ? 'light' : 'dark');
+
+         // Update icon
+         const icon = themeToggleBtn.querySelector('.btn-icon');
+         if (icon) {
+            icon.textContent = isLight ? '☀️' : '🌙';
+         }
+
+         // Update button text language label
+         const dict = translations[currentLang];
+         const themeBtnText = themeToggleBtn.querySelector('.btn-text');
+         if (themeBtnText) {
+            themeBtnText.textContent = isLight ? dict['control_theme_light'] : dict['control_theme_dark'];
+         }
+
+         // Re-init canvas particles for new theme style
+         if (globalReinitParticles) {
+            globalReinitParticles();
+         }
+      });
+   }
+
+   // Language Toggle Click Handler
+   if (langToggleBtn) {
+      langToggleBtn.addEventListener('click', () => {
+         const targetLang = currentLang === 'id' ? 'en' : 'id';
+         setLanguage(targetLang);
+      });
+   }
+}
+
+// Initialize all features on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+   initThemeSystem();
+   initCanvasParticles();
+   init3DTilt();
+   init3DGridTilt();
+});

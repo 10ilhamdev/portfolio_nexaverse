@@ -37,47 +37,49 @@ https://templatemo.com/tm-603-nexaverse
     <!-- Grid Overlay -->
     <div class="grid-overlay"></div>
 
+    <!-- Particles Canvas -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Theme & Language Controls -->
+    <div class="controls-wrapper">
+        <button id="themeToggle" class="control-btn" aria-label="Toggle Theme">
+            <span class="btn-icon">🌙</span>
+            <span class="btn-text" data-translate="control_theme">GELAP</span>
+        </button>
+        <button id="langToggle" class="control-btn" aria-label="Toggle Language">
+            <span class="btn-icon">🌐</span>
+            <span class="btn-text">ID</span>
+        </button>
+    </div>
+
     <!-- Main Container -->
     <div class="container">
         <!-- Header -->
         <div class="header" id="mainHeader">
             <div class="logo">
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#00f0ff" />
-                            <stop offset="100%" style="stop-color:#7700ff" />
-                        </linearGradient>
-                    </defs>
-                    <polygon points="50,5 95,30 95,70 50,95 5,70 5,30" fill="none" stroke="url(#logoGradient)"
-                        stroke-width="2" />
-                    <polygon points="50,20 80,37 80,63 50,80 20,63 20,37" fill="none" stroke="url(#logoGradient)"
-                        stroke-width="1.5" opacity="0.6" />
-                    <circle cx="50" cy="50" r="12" fill="url(#logoGradient)" opacity="0.3" />
-                    <circle cx="50" cy="50" r="6" fill="url(#logoGradient)" />
-                </svg>
+                <img src="images/ilham.png" alt="IMS Logo" class="logo-img">
             </div>
             <h1 class="brand-name">Ilham Munawar</h1>
-            <p class="tagline">Informatics Engineering</p>
+            <p class="tagline" data-translate="brand_sub">Informatics Engineering</p>
         </div>
 
         <!-- Menu Grid -->
         <div class="menu-grid" id="menuGrid">
             <div class="menu-item initial-load" data-section="introduction">
-                <div class="menu-badge">PR</div>
-                <div class="menu-title">Perkenalan</div>
+                <div class="menu-badge" data-translate="menu_intro_badge">PR</div>
+                <div class="menu-title" data-translate="menu_intro">Perkenalan</div>
             </div>
             <div class="menu-item initial-load" data-section="services">
-                <div class="menu-badge">PY</div>
-                <div class="menu-title">Proyek</div>
+                <div class="menu-badge" data-translate="menu_proj_badge">PY</div>
+                <div class="menu-title" data-translate="menu_projects">Proyek</div>
             </div>
             <div class="menu-item initial-load" data-section="gallery">
-                <div class="menu-badge">SF</div>
-                <div class="menu-title">Sertifikat</div>
+                <div class="menu-badge" data-translate="menu_certs_badge">SF</div>
+                <div class="menu-title" data-translate="menu_certs">Sertifikat</div>
             </div>
             <div class="menu-item initial-load" data-section="contact">
-                <div class="menu-badge">KT</div>
-                <div class="menu-title">Kontak</div>
+                <div class="menu-badge" data-translate="menu_contact_badge">KT</div>
+                <div class="menu-title" data-translate="menu_contact">Kontak</div>
             </div>
         </div>
 
@@ -87,47 +89,38 @@ https://templatemo.com/tm-603-nexaverse
             <div class="content-section" id="introduction">
                 <div class="section-header-small">
                     <div class="small-logo">
-                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="smallLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#00f0ff" />
-                                    <stop offset="100%" style="stop-color:#ff00d4" />
-                                </linearGradient>
-                            </defs>
-                            <polygon points="50,10 85,32 85,68 50,90 15,68 15,32" fill="none"
-                                stroke="url(#smallLogoGrad)" stroke-width="3" />
-                            <circle cx="50" cy="50" r="10" fill="url(#smallLogoGrad)" />
-                        </svg>
+                        <img src="images/ilham.png" alt="IMS Logo">
                     </div>
                     <div class="small-brand">
                         <h3>Ilham Munawar</h3>
-                        <p>Informatics Engineering</p>
+                        <p data-translate="brand_sub">Informatics Engineering</p>
                     </div>
                 </div>
-                <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+                <button class="back-btn" onclick="backToMenu()" data-translate="btn_back">← Back to Menu</button>
 
                 <!-- Hero Banner -->
                 <div class="intro-hero">
                     <div class="intro-hero-content">
                         <span class="intro-badge" id="currentYear">2025</span>
-                        <h1 class="intro-headline">Perkenalan<br><span>Diri</span> </h1>
-                        <p class="intro-subtext">Saya seorang Web Developer dengan pengalaman dalam pengembangan Website
-                        </p>
+                        <h1 class="intro-headline" id="introHeadline" data-translate="intro_headline">
+                            Perkenalan<br><span>Diri</span></h1>
+                        <p class="intro-subtext" data-translate="intro_desc">Saya seorang Web Developer dengan
+                            pengalaman dalam pengembangan Website</p>
                         <div class="intro-cta-group">
-                            <button class="intro-cta-primary"
-                                onclick="toggleEducation('pengalaman')">Pengalaman</button>
-                            <button class="intro-cta-secondary"
-                                onclick="toggleEducation('pendidikan')">Pendidikan</button>
+                            <button class="intro-cta-primary" onclick="toggleEducation('pengalaman')"
+                                data-translate="btn_exp">Pengalaman</button>
+                            <button class="intro-cta-secondary" onclick="toggleEducation('pendidikan')"
+                                data-translate="btn_edu">Pendidikan</button>
                         </div>
                     </div>
                     <div class="intro-hero-visual">
                         <div class="intro-floating-card card-1">
                             <span class="card-icon">🔒</span>
-                            <span class="card-text">Konsisten</span>
+                            <span class="card-text" data-translate="badge_consistent">Konsisten</span>
                         </div>
                         <div class="intro-floating-card card-2">
                             <span class="card-icon">🎯</span>
-                            <span class="card-text">Fokus</span>
+                            <span class="card-text" data-translate="badge_focused">Fokus</span>
                         </div>
                         <div class="intro-orb"></div>
                     </div>
@@ -137,9 +130,9 @@ https://templatemo.com/tm-603-nexaverse
                 <div class="intro-values" id="pengalaman" style="display:none;">
                     <div class="value-card">
                         <div class="value-number">01</div>
-                        <h3>Full Stack Developer</h3>
-                        <p>Magang (Agustus 2024 - Desember 2024)</p>
-                        <p>Badan Riset dan Inovasi Nasional</p>
+                        <h3 data-translate="exp_title">Full Stack Developer</h3>
+                        <p data-translate="exp_meta">Magang (Agustus 2024 - Desember 2024)</p>
+                        <p data-translate="exp_company">Badan Riset dan Inovasi Nasional</p>
                     </div>
                 </div>
 
@@ -147,9 +140,9 @@ https://templatemo.com/tm-603-nexaverse
                 <div class="intro-values" id="pendidikan" style="display:none;">
                     <div class="value-card">
                         <div class="value-number">01</div>
-                        <h3>D3 Teknik Informatika</h3>
-                        <p>IPK: 3.51</p>
-                        <p>Politeknik Negeri Cilacap (2022 - 2025)</p>
+                        <h3 data-translate="edu_title">D3 Teknik Informatika</h3>
+                        <p data-translate="edu_meta">IPK: 3.51</p>
+                        <p data-translate="edu_school">Politeknik Negeri Cilacap (2022 - 2025)</p>
                     </div>
                 </div>
 
@@ -179,28 +172,18 @@ https://templatemo.com/tm-603-nexaverse
             <div class="content-section" id="services">
                 <div class="section-header-small">
                     <div class="small-logo">
-                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="smallLogoGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#00f0ff" />
-                                    <stop offset="100%" style="stop-color:#ff00d4" />
-                                </linearGradient>
-                            </defs>
-                            <polygon points="50,10 85,32 85,68 50,90 15,68 15,32" fill="none"
-                                stroke="url(#smallLogoGrad2)" stroke-width="3" />
-                            <circle cx="50" cy="50" r="10" fill="url(#smallLogoGrad2)" />
-                        </svg>
+                        <img src="images/ilham.png" alt="IMS Logo">
                     </div>
                     <div class="small-brand">
                         <h3>Ilham Munawar</h3>
-                        <p>Informatics Engineering</p>
+                        <p data-translate="brand_sub">Informatics Engineering</p>
                     </div>
                 </div>
-                <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+                <button class="back-btn" onclick="backToMenu()" data-translate="btn_back">← Back to Menu</button>
 
                 <div class="section-header">
-                    <h2 class="section-title">Proyek</h2>
-                    <p class="section-subtitle">Proyek Saya</p>
+                    <h2 class="section-title" data-translate="proj_title">Proyek</h2>
+                    <p class="section-subtitle" data-translate="proj_sub">Proyek Saya</p>
                 </div>
 
                 <div class="tabs-container">
@@ -218,7 +201,8 @@ https://templatemo.com/tm-603-nexaverse
                                     </div>
                                     <div class="service-row-content">
                                         <h4>SIMAPUS</h4>
-                                        <p>Sistem Informasi Manajemen Puskesmas Berbasis Desktop</p>
+                                        <p data-translate="proj_simapus_desc">Sistem Informasi Manajemen Puskesmas
+                                            Berbasis Desktop</p>
                                     </div>
                                     <div class="service-row-arrow">→</div>
                                     <a class="service-row-link" href="https://github.com/10ilham/simapus"
@@ -230,7 +214,7 @@ https://templatemo.com/tm-603-nexaverse
                                     </div>
                                     <div class="service-row-content">
                                         <h4>Sistem Rawat Inap</h4>
-                                        <p>Sistem Rawat Inap Berbasis Website</p>
+                                        <p data-translate="proj_rawatinap_desc">Sistem Rawat Inap Berbasis Website</p>
                                     </div>
                                     <div class="service-row-arrow">→</div>
                                     <a class="service-row-link" href="https://github.com/10ilham/sistem_rawat_inap"
@@ -242,7 +226,8 @@ https://templatemo.com/tm-603-nexaverse
                                     </div>
                                     <div class="service-row-content">
                                         <h4>Kuesioner</h4>
-                                        <p>Sistem Informasi Kuesioner Berbasis Website Codeigniter</p>
+                                        <p data-translate="proj_kuesioner_desc">Sistem Informasi Kuesioner Berbasis
+                                            Website Codeigniter</p>
                                     </div>
                                     <div class="service-row-arrow">→</div>
                                     <a class="service-row-link" href="https://github.com/10ilham/Kuesioner"
@@ -259,7 +244,7 @@ https://templatemo.com/tm-603-nexaverse
                                     </div>
                                     <div class="service-row-content">
                                         <h4>I&U Touch</h4>
-                                        <p>Desain Aplikasi Skincare</p>
+                                        <p data-translate="proj_skincare_desc">Desain Aplikasi Skincare</p>
                                     </div>
                                     <div class="service-row-arrow">→</div>
                                     <a class="service-row-link"
@@ -297,36 +282,31 @@ https://templatemo.com/tm-603-nexaverse
             <div class="content-section" id="gallery">
                 <div class="section-header-small">
                     <div class="small-logo">
-                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="smallLogoGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#00f0ff" />
-                                    <stop offset="100%" style="stop-color:#ff00d4" />
-                                </linearGradient>
-                            </defs>
-                            <polygon points="50,10 85,32 85,68 50,90 15,68 15,32" fill="none"
-                                stroke="url(#smallLogoGrad3)" stroke-width="3" />
-                            <circle cx="50" cy="50" r="10" fill="url(#smallLogoGrad3)" />
-                        </svg>
+                        <img src="images/ilham.png" alt="IMS Logo">
                     </div>
                     <div class="small-brand">
                         <h3>Ilham Munawar</h3>
-                        <p>Informatics Engineering</p>
+                        <p data-translate="brand_sub">Informatics Engineering</p>
                     </div>
                 </div>
-                <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+                <button class="back-btn" onclick="backToMenu()" data-translate="btn_back">← Back to Menu</button>
 
                 <div class="section-header">
-                    <h2 class="section-title">Portfolio</h2>
-                    <p class="section-subtitle">Jelajahi Sertifikat saya</p>
+                    <h2 class="section-title" data-translate="cert_title">Portfolio</h2>
+                    <p class="section-subtitle" data-translate="cert_sub">Jelajahi Sertifikat saya</p>
                 </div>
 
                 <div class="filter-buttons">
-                    <button class="filter-btn active" onclick="filterGallery('all', this)">All</button>
-                    <button class="filter-btn" onclick="filterGallery('website', this)">Website</button>
-                    <button class="filter-btn" onclick="filterGallery('ai', this)">Kecerdasan Buatan</button>
-                    <button class="filter-btn" onclick="filterGallery('jaringan', this)">Jaringan</button>
-                    <button class="filter-btn" onclick="filterGallery('database', this)">Database</button>
+                    <button class="filter-btn active" onclick="filterGallery('all', this)"
+                        data-translate="filter_all">All</button>
+                    <button class="filter-btn" onclick="filterGallery('website', this)"
+                        data-translate="filter_website">Website</button>
+                    <button class="filter-btn" onclick="filterGallery('ai', this)" data-translate="filter_ai">Kecerdasan
+                        Buatan</button>
+                    <button class="filter-btn" onclick="filterGallery('jaringan', this)"
+                        data-translate="filter_network">Jaringan</button>
+                    <button class="filter-btn" onclick="filterGallery('database', this)"
+                        data-translate="filter_db">Database</button>
                 </div>
 
                 <div class="gallery-grid">
@@ -432,21 +412,11 @@ https://templatemo.com/tm-603-nexaverse
             <div class="content-section" id="contact">
                 <div class="section-header-small">
                     <div class="small-logo">
-                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="smallLogoGrad6" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#00f0ff" />
-                                    <stop offset="100%" style="stop-color:#ff00d4" />
-                                </linearGradient>
-                            </defs>
-                            <polygon points="50,10 85,32 85,68 50,90 15,68 15,32" fill="none"
-                                stroke="url(#smallLogoGrad6)" stroke-width="3" />
-                            <circle cx="50" cy="50" r="10" fill="url(#smallLogoGrad6)" />
-                        </svg>
+                        <img src="images/ilham.png" alt="IMS Logo">
                     </div>
                     <div class="small-brand">
                         <h3>Ilham Munawar</h3>
-                        <p>Informatics Engineering>
+                        <p>Informatics Engineering</p>
                     </div>
                 </div>
                 <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
