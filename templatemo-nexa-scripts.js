@@ -389,7 +389,7 @@ function initCanvasParticles() {
       mouse.y = null;
    });
 
-   class Particle {
+    class Particle {
       constructor(x, y, directionX, directionY, size, color) {
          this.x = x;
          this.y = y;
@@ -402,10 +402,10 @@ function initCanvasParticles() {
 
       draw() {
          const isLight = document.body.classList.contains('light-mode');
-         ctx.beginPath();
-         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
          
          if (isLight) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
             if (this.isRing) {
                ctx.strokeStyle = this.color;
                ctx.lineWidth = 1.0;
@@ -415,8 +415,35 @@ function initCanvasParticles() {
                ctx.fill();
             }
          } else {
-            ctx.fillStyle = this.color;
-            ctx.fill();
+            // Dark Mode: Beautiful HD Star Core Rendering
+            if (this.size > 2.2) {
+               // 4-pointed star cross lines
+               ctx.strokeStyle = this.color;
+               ctx.lineWidth = 0.6;
+               ctx.beginPath();
+               ctx.moveTo(this.x - this.size * 2.8, this.y);
+               ctx.lineTo(this.x + this.size * 2.8, this.y);
+               ctx.moveTo(this.x, this.y - this.size * 2.8);
+               ctx.lineTo(this.x, this.y + this.size * 2.8);
+               ctx.stroke();
+               
+               // Bright sharp center core
+               ctx.fillStyle = '#ffffff';
+               ctx.beginPath();
+               ctx.arc(this.x, this.y, this.size * 0.7, 0, Math.PI * 2, false);
+               ctx.fill();
+            } else {
+               // Standard sharp star point with glow and bright core
+               ctx.fillStyle = this.color;
+               ctx.beginPath();
+               ctx.arc(this.x, this.y, this.size * 1.5, 0, Math.PI * 2, false);
+               ctx.fill();
+               
+               ctx.fillStyle = '#ffffff';
+               ctx.beginPath();
+               ctx.arc(this.x, this.y, this.size * 0.6, 0, Math.PI * 2, false);
+               ctx.fill();
+            }
          }
       }
 
@@ -462,15 +489,16 @@ function initCanvasParticles() {
             particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
          }
       } else {
-         // Dark Mode: Sharp constellation nodes
-         let numberOfParticles = Math.min((canvas.width * canvas.height) / 8000, 120);
+         // Dark Mode: Sharp constellation nodes (optimized limit for mobile devices to prevent lag)
+         const maxParticles = window.innerWidth < 768 ? 45 : 120;
+         let numberOfParticles = Math.min((canvas.width * canvas.height) / 8000, maxParticles);
          for (let i = 0; i < numberOfParticles; i++) {
             let size = Math.random() * 2 + 1;
             let x = Math.random() * (canvas.width - size * 2) + size;
             let y = Math.random() * (canvas.height - size * 2) + size;
             let directionX = (Math.random() * 0.4) - 0.2;
             let directionY = (Math.random() * 0.4) - 0.2;
-            let color = Math.random() > 0.5 ? 'rgba(0, 240, 255, 0.7)' : 'rgba(255, 0, 212, 0.6)';
+            let color = Math.random() > 0.5 ? 'rgba(0, 240, 255, 0.75)' : 'rgba(255, 0, 212, 0.65)';
             particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
          }
       }
@@ -480,22 +508,71 @@ function initCanvasParticles() {
       const isLight = document.body.classList.contains('light-mode');
       if (isLight) return; // No connections in Light Mode
 
-      let opacityValue = 1;
-      for (let a = 0; a < particlesArray.length; a++) {
-         for (let b = a; b < particlesArray.length; b++) {
-            let dx = particlesArray[a].x - particlesArray[b].x;
-            let dy = particlesArray[a].y - particlesArray[b].y;
-            let distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance < 120) {
-               opacityValue = 1 - (distance / 120);
-               ctx.strokeStyle = `rgba(0, 240, 255, ${opacityValue * 0.25})`;
-               ctx.lineWidth = 1.0;
-               ctx.beginPath();
-               ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-               ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-               ctx.stroke();
+      // Performance Optimization: Batch draw calls by grouping lines into opacity levels
+      const bin0 = []; // opacity level ~ 0.08
+      const bin1 = []; // opacity level ~ 0.16
+      const bin2 = []; // opacity level ~ 0.24
+
+      const len = particlesArray.length;
+      for (let a = 0; a < len; a++) {
+         const pA = particlesArray[a];
+         for (let b = a + 1; b < len; b++) {
+            const pB = particlesArray[b];
+            const dx = pA.x - pB.x;
+            const dy = pA.y - pB.y;
+            const distSq = dx * dx + dy * dy;
+            if (distSq < 14400) { // 120 * 120
+               const dist = Math.sqrt(distSq);
+               const opacity = 1 - (dist / 120);
+               const line = { x1: pA.x, y1: pA.y, x2: pB.x, y2: pB.y };
+               if (opacity < 0.33) {
+                  bin0.push(line);
+               } else if (opacity < 0.66) {
+                  bin1.push(line);
+               } else {
+                  bin2.push(line);
+               }
             }
          }
+      }
+
+      // Draw Bin 0 (Faint links)
+      if (bin0.length > 0) {
+         ctx.strokeStyle = 'rgba(0, 240, 255, 0.08)';
+         ctx.lineWidth = 0.8;
+         ctx.beginPath();
+         for (let i = 0; i < bin0.length; i++) {
+            const l = bin0[i];
+            ctx.moveTo(l.x1, l.y1);
+            ctx.lineTo(l.x2, l.y2);
+         }
+         ctx.stroke();
+      }
+
+      // Draw Bin 1 (Medium links)
+      if (bin1.length > 0) {
+         ctx.strokeStyle = 'rgba(0, 240, 255, 0.16)';
+         ctx.lineWidth = 1.0;
+         ctx.beginPath();
+         for (let i = 0; i < bin1.length; i++) {
+            const l = bin1[i];
+            ctx.moveTo(l.x1, l.y1);
+            ctx.lineTo(l.x2, l.y2);
+         }
+         ctx.stroke();
+      }
+
+      // Draw Bin 2 (Strong links)
+      if (bin2.length > 0) {
+         ctx.strokeStyle = 'rgba(0, 240, 255, 0.26)';
+         ctx.lineWidth = 1.3;
+         ctx.beginPath();
+         for (let i = 0; i < bin2.length; i++) {
+            const l = bin2[i];
+            ctx.moveTo(l.x1, l.y1);
+            ctx.lineTo(l.x2, l.y2);
+         }
+         ctx.stroke();
       }
    }
 
