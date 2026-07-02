@@ -126,6 +126,7 @@ body {
 	0% {
 		background-position: center 0px;
 	}
+
 	100% {
 		background-position: center 60px;
 	}
@@ -162,8 +163,7 @@ body.light-mode #dragon-canvas {
 }
 
 body:not(.light-mode) #dragon-canvas {
-	filter: drop-shadow(0 0 30px rgba(220, 50, 0, 0.65))
-	        drop-shadow(0 0 55px rgba(180, 20, 0, 0.35));
+	filter: drop-shadow(0 0 30px rgba(220, 50, 0, 0.65)) drop-shadow(0 0 55px rgba(180, 20, 0, 0.35));
 }
 
 /* Loading Screen */
@@ -271,9 +271,11 @@ body:not(.light-mode) #dragon-canvas {
 	0% {
 		background-position: 0% 50%;
 	}
+
 	50% {
 		background-position: 100% 50%;
 	}
+
 	100% {
 		background-position: 0% 50%;
 	}
@@ -283,6 +285,7 @@ body:not(.light-mode) #dragon-canvas {
 	0% {
 		filter: hue-rotate(0deg);
 	}
+
 	100% {
 		filter: hue-rotate(360deg);
 	}
@@ -1469,31 +1472,31 @@ body:not(.light-mode) #dragon-canvas {
 }
 
 .about-text a {
-    color: var(--primary);
-    text-decoration: none;
-    position: relative;
-    padding-bottom: 2px;
-    transition: all 0.3s ease;
+	color: var(--primary);
+	text-decoration: none;
+	position: relative;
+	padding-bottom: 2px;
+	transition: all 0.3s ease;
 }
 
 .about-text a::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background: linear-gradient(90deg, var(--primary), var(--accent));
-    transition: width 0.3s ease;
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 0;
+	height: 1px;
+	background: linear-gradient(90deg, var(--primary), var(--accent));
+	transition: width 0.3s ease;
 }
 
 .about-text a:hover {
-    color: #ffffff;
-    text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+	color: #ffffff;
+	text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
 }
 
 .about-text a:hover::after {
-    width: 100%;
+	width: 100%;
 }
 
 .about-image {
@@ -1740,6 +1743,7 @@ body:not(.light-mode) #dragon-canvas {
 	from {
 		opacity: 0;
 	}
+
 	to {
 		opacity: 1;
 	}
@@ -1776,6 +1780,7 @@ body:not(.light-mode) #dragon-canvas {
 		transform: translateY(50px) scale(0.95);
 		opacity: 0;
 	}
+
 	to {
 		transform: translateY(0) scale(1);
 		opacity: 1;
@@ -2187,10 +2192,14 @@ body {
 }
 
 body.light-mode {
-	--primary: #007acc;       /* Exact Vibrant Blue from the image */
-	--secondary: #005f9e;     /* Deep Steel Blue */
-	--accent: #007acc;        /* Match Primary Accent */
-	--dark-1: #e6f0fa;        /* Soft Light Blue background */
+	--primary: #007acc;
+	/* Exact Vibrant Blue from the image */
+	--secondary: #005f9e;
+	/* Deep Steel Blue */
+	--accent: #007acc;
+	/* Match Primary Accent */
+	--dark-1: #e6f0fa;
+	/* Soft Light Blue background */
 	--dark-2: #dbe7f5;
 	--dark-3: #cddbec;
 	--glass-bg: rgba(0, 122, 204, 0.05);
@@ -2353,19 +2362,19 @@ body.light-mode .contact-details p {
 	color: rgba(33, 37, 41, 0.7);
 }
 
-body.light-mode .form-group input, 
+body.light-mode .form-group input,
 body.light-mode .form-group textarea {
 	color: #000000;
 	border-color: rgba(0, 0, 0, 0.12);
 }
 
-body.light-mode .form-group input:focus, 
+body.light-mode .form-group input:focus,
 body.light-mode .form-group textarea:focus {
 	border-color: var(--primary);
 	background: rgba(0, 119, 182, 0.02);
 }
 
-body.light-mode .form-group input::placeholder, 
+body.light-mode .form-group input::placeholder,
 body.light-mode .form-group textarea::placeholder {
 	color: rgba(33, 37, 41, 0.45);
 }
@@ -2443,42 +2452,129 @@ body.light-mode #particles-canvas {
 }
 
 @keyframes lightRgbBackground {
-	0%, 100% {
-		filter: hue-rotate(0deg);         /* Royal Blue base */
+
+	0%,
+	100% {
+		filter: hue-rotate(0deg);
+		/* Royal Blue base */
 	}
+
 	20% {
-		filter: hue-rotate(-30deg);        /* Cobalt / Electric Blue */
+		filter: hue-rotate(-30deg);
+		/* Cobalt / Electric Blue */
 	}
+
 	40% {
-		filter: hue-rotate(-55deg);        /* Cyan / Steel Blue */
+		filter: hue-rotate(-55deg);
+		/* Cyan / Steel Blue */
 	}
+
 	60% {
-		filter: hue-rotate(20deg);         /* Sapphire Blue */
+		filter: hue-rotate(20deg);
+		/* Sapphire Blue */
 	}
+
 	80% {
-		filter: hue-rotate(-20deg);        /* Navy / Deep Blue */
+		filter: hue-rotate(-20deg);
+		/* Navy / Deep Blue */
 	}
 }
 
 @keyframes lightOrb1 {
-	0%, 100% { background: radial-gradient(circle, rgba(0, 122, 204, 0.15) 0%, transparent 70%); }
-	33% { background: radial-gradient(circle, rgba(0, 60, 150, 0.15) 0%, transparent 70%); }
-	66% { background: radial-gradient(circle, rgba(0, 180, 216, 0.15) 0%, transparent 70%); }
+
+	0%,
+	100% {
+		background: radial-gradient(circle, rgba(0, 122, 204, 0.15) 0%, transparent 70%);
+	}
+
+	33% {
+		background: radial-gradient(circle, rgba(0, 60, 150, 0.15) 0%, transparent 70%);
+	}
+
+	66% {
+		background: radial-gradient(circle, rgba(0, 180, 216, 0.15) 0%, transparent 70%);
+	}
 }
 
 @keyframes lightOrb2 {
-	0%, 100% { background: radial-gradient(circle, rgba(0, 95, 158, 0.12) 0%, transparent 70%); }
-	33% { background: radial-gradient(circle, rgba(0, 50, 130, 0.12) 0%, transparent 70%); }
-	66% { background: radial-gradient(circle, rgba(2, 132, 199, 0.12) 0%, transparent 70%); }
+
+	0%,
+	100% {
+		background: radial-gradient(circle, rgba(0, 95, 158, 0.12) 0%, transparent 70%);
+	}
+
+	33% {
+		background: radial-gradient(circle, rgba(0, 50, 130, 0.12) 0%, transparent 70%);
+	}
+
+	66% {
+		background: radial-gradient(circle, rgba(2, 132, 199, 0.12) 0%, transparent 70%);
+	}
 }
 
 @keyframes lightOrb3 {
-	0%, 100% { background: radial-gradient(circle, rgba(0, 122, 204, 0.10) 0%, transparent 70%); }
-	33% { background: radial-gradient(circle, rgba(30, 58, 138, 0.12) 0%, transparent 70%); }
-	66% { background: radial-gradient(circle, rgba(0, 173, 230, 0.10) 0%, transparent 70%); }
+
+	0%,
+	100% {
+		background: radial-gradient(circle, rgba(0, 122, 204, 0.10) 0%, transparent 70%);
+	}
+
+	33% {
+		background: radial-gradient(circle, rgba(30, 58, 138, 0.12) 0%, transparent 70%);
+	}
+
+	66% {
+		background: radial-gradient(circle, rgba(0, 173, 230, 0.10) 0%, transparent 70%);
+	}
 }
 
 @keyframes lightIntroOrb {
-	0%, 100% { background: radial-gradient(circle at 30% 30%, rgba(30, 58, 138, 0.15), rgba(0, 119, 182, 0.1) 50%, transparent 70%); }
-	50% { background: radial-gradient(circle at 30% 30%, rgba(0, 90, 180, 0.15), rgba(0, 180, 216, 0.10) 50%, transparent 70%); }
+
+	0%,
+	100% {
+		background: radial-gradient(circle at 30% 30%, rgba(30, 58, 138, 0.15), rgba(0, 119, 182, 0.1) 50%, transparent 70%);
+	}
+
+	50% {
+		background: radial-gradient(circle at 30% 30%, rgba(0, 90, 180, 0.15), rgba(0, 180, 216, 0.10) 50%, transparent 70%);
+	}
+}
+
+/* LinkedIn Badge Container in Contact Page */
+.linkedin-badge-container {
+	margin-top: 20px;
+	width: 100%;
+	display: flex;
+	justify-content: flex-start;
+	z-index: 20;
+	min-height: 310px;
+}
+
+/* Hide fallback links completely */
+.linkedin-badge-container .LI-simple-link,
+.linkedin-badge-container a.badge-base__link {
+	display: none !important;
+}
+
+/* Toggle dark/light theme badges based on theme */
+.linkedin-badge-dark {
+	display: block !important;
+}
+
+.linkedin-badge-light {
+	display: none !important;
+}
+
+body.light-mode .linkedin-badge-dark {
+	display: none !important;
+}
+
+body.light-mode .linkedin-badge-light {
+	display: block !important;
+}
+
+@media (max-width: 992px) {
+	.linkedin-badge-container {
+		justify-content: center;
+	}
 }
